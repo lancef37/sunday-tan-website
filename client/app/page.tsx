@@ -1,91 +1,61 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-cover bg-center bg-no-repeat relative" 
+         style={{
+           backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.3)), url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iZ3JhZGllbnQiIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMTAwJSIgeTI9IjEwMCUiPgogICAgICA8c3RvcCBvZmZzZXQ9IjAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZjNlNWFiO3N0b3Atb3BhY2l0eToxIiAvPgogICAgICA8c3RvcCBvZmZzZXQ9IjUwJSIgc3R5bGU9InN0b3AtY29sb3I6I2VkZDU5NDtzdG9wLW9wYWNpdHk6MSIgLz4KICAgICAgPHN0b3Agb2Zmc2V0PSIxMDAlIiBzdHlsZT0ic3RvcC1jb2xvcjojZGJiZjk0O3N0b3Atb3BhY2l0eToxIiAvPgogICAgPC9saW5lYXJHcmFkaWVudD4KICA8L2RlZnM+CiAgPHJlY3Qgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgZmlsbD0idXJsKCNncmFkaWVudCkiIC8+Cjwvc3ZnPg==')`
+         }}>
+      
       {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div className="flex items-center">
-              <h1 className="text-2xl font-bold text-tan-bronze">Sunday Tan</h1>
-            </div>
+      <header className="relative z-10 bg-white/90 backdrop-blur-sm">
+        <div className="max-w-6xl mx-auto px-6">
+          <div className="flex justify-between items-center py-4">
+            <Link href="/" className="text-xl font-light text-gray-800 tracking-wide">
+              SUNDAY TAN
+            </Link>
             <nav className="flex space-x-8">
-              <Link href="/" className="text-gray-600 hover:text-tan-bronze">Home</Link>
-              <Link href="/book" className="text-gray-600 hover:text-tan-bronze">Book Now</Link>
-              <Link href="/admin" className="text-gray-600 hover:text-tan-bronze">Admin</Link>
+              <Link href="/" className="text-sm text-gray-600 hover:text-gray-800 transition-colors uppercase tracking-wide">
+                Home
+              </Link>
+              <Link href="/book" className="text-sm text-gray-600 hover:text-gray-800 transition-colors uppercase tracking-wide">
+                Services
+              </Link>
+              <Link href="/book" className="text-sm text-gray-600 hover:text-gray-800 transition-colors uppercase tracking-wide">
+                Contact
+              </Link>
+              <Link href="/admin" className="text-sm text-gray-600 hover:text-gray-800 transition-colors uppercase tracking-wide">
+                Admin
+              </Link>
             </nav>
           </div>
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="bg-gradient-to-r from-tan-cream to-tan-gold py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-5xl font-bold text-gray-900 mb-6">
-            Professional Mobile Spray Tan
-          </h2>
-          <p className="text-xl text-gray-700 mb-8 max-w-3xl mx-auto">
-            Get a beautiful, natural-looking tan in the comfort of your own home. 
-            Professional mobile spray tan services that come to you.
-          </p>
-          <Link 
-            href="/book" 
-            className="btn-primary text-lg px-8 py-4 inline-block"
-          >
-            Book Your Tan Now
-          </Link>
+      {/* Main Content */}
+      <div className="flex-1 flex items-center justify-center text-center px-6">
+        <div className="max-w-4xl">
+          <h1 className="text-6xl md:text-7xl lg:text-8xl font-light text-white mb-8 leading-tight tracking-wide">
+            REAL BODIES.
+            <br />
+            FAKE TANS.
+            <br />
+            <span className="italic">SUNDAY TAN.</span>
+          </h1>
         </div>
-      </section>
+      </div>
 
-      {/* Services Section */}
-      <section className="py-16 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h3 className="text-3xl font-bold text-gray-900 mb-4">Our Services</h3>
-            <p className="text-lg text-gray-600">Professional spray tan services delivered to your door</p>
-          </div>
-          
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="card text-center">
-              <h4 className="text-xl font-semibold mb-4">Mobile Service</h4>
-              <p className="text-gray-600">We come to you! No need to travel - enjoy your tan session at home.</p>
-            </div>
-            <div className="card text-center">
-              <h4 className="text-xl font-semibold mb-4">Professional Quality</h4>
-              <p className="text-gray-600">High-quality products and expert application for natural-looking results.</p>
-            </div>
-            <div className="card text-center">
-              <h4 className="text-xl font-semibold mb-4">Flexible Scheduling</h4>
-              <p className="text-gray-600">Book appointments that work with your schedule, including evenings and weekends.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className="bg-tan-bronze py-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h3 className="text-3xl font-bold text-white mb-6">Ready to Get Your Glow On?</h3>
-          <p className="text-xl text-white mb-8">Book your appointment today and get ready to feel confident and radiant.</p>
-          <Link 
-            href="/book" 
-            className="bg-white text-tan-bronze hover:bg-gray-100 font-semibold py-3 px-8 rounded-lg transition-colors duration-200 inline-block"
-          >
-            Schedule Now
-          </Link>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p>&copy; 2024 Sunday Tan. All rights reserved.</p>
-        </div>
-      </footer>
+      {/* Book Now Button */}
+      <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 z-10">
+        <Link 
+          href="/book" 
+          className="bg-white text-gray-800 hover:bg-gray-100 font-medium py-4 px-12 rounded-full transition-all duration-300 uppercase tracking-widest text-sm shadow-lg hover:shadow-xl transform hover:-translate-y-1"
+        >
+          Book Now
+        </Link>
+      </div>
     </div>
   )
 }
