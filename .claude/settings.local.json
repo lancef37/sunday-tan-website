@@ -5,7 +5,10 @@
       "Bash(npm install:*)",
       "Bash(copy .env.example .env)",
       "Bash(cp:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
     ],
     "deny": []
   }
