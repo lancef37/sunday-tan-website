@@ -121,18 +121,19 @@ export default function BookingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-tan-cream py-8">
+    <div className="min-h-screen bg-gradient-to-br from-tan-50 via-tan-100 to-tan-200 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Book Your Spray Tan</h1>
+          <h1 className="text-4xl font-serif font-light text-tan-900 mb-4">Book Your Session</h1>
+          <p className="text-tan-600 mb-8">Schedule your professional spray tan experience</p>
           <div className="flex justify-center space-x-4 mb-6">
-            <div className={`px-4 py-2 rounded-lg ${step === 'calendar' ? 'bg-tan-gold text-white' : 'bg-gray-200'}`}>
+            <div className={`px-6 py-3 rounded-full ${step === 'calendar' ? 'bg-tan-700 text-white shadow-lg' : 'bg-white text-tan-600 border border-tan-200'} transition-all duration-300`}>
               1. Select Date & Time
             </div>
-            <div className={`px-4 py-2 rounded-lg ${step === 'details' ? 'bg-tan-gold text-white' : 'bg-gray-200'}`}>
+            <div className={`px-6 py-3 rounded-full ${step === 'details' ? 'bg-tan-700 text-white shadow-lg' : 'bg-white text-tan-600 border border-tan-200'} transition-all duration-300`}>
               2. Your Details
             </div>
-            <div className={`px-4 py-2 rounded-lg ${step === 'payment' ? 'bg-tan-gold text-white' : 'bg-gray-200'}`}>
+            <div className={`px-6 py-3 rounded-full ${step === 'payment' ? 'bg-tan-700 text-white shadow-lg' : 'bg-white text-tan-600 border border-tan-200'} transition-all duration-300`}>
               3. Payment
             </div>
           </div>
@@ -161,10 +162,10 @@ export default function BookingPage() {
                         key={slot.time}
                         onClick={() => handleTimeSelect(slot.time)}
                         disabled={!slot.available}
-                        className={`p-3 rounded-lg border ${
+                        className={`p-3 rounded-lg border transition-all duration-300 ${
                           slot.available
-                            ? 'border-tan-gold hover:bg-tan-gold hover:text-white'
-                            : 'border-gray-300 bg-gray-100 text-gray-400 cursor-not-allowed'
+                            ? 'border-tan-300 hover:bg-tan-700 hover:text-white hover:border-tan-700 bg-white text-tan-700'
+                            : 'border-tan-200 bg-tan-50 text-tan-400 cursor-not-allowed'
                         }`}
                       >
                         {slot.time}
@@ -194,7 +195,7 @@ export default function BookingPage() {
                   required
                   value={bookingData.clientName}
                   onChange={(e) => setBookingData({...bookingData, clientName: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-gold"
+                  className="w-full px-4 py-3 border border-tan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-500 focus:border-tan-500 transition-all duration-300 bg-white"
                 />
               </div>
               
@@ -207,7 +208,7 @@ export default function BookingPage() {
                   required
                   value={bookingData.clientPhone}
                   onChange={(e) => setBookingData({...bookingData, clientPhone: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-gold"
+                  className="w-full px-4 py-3 border border-tan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-500 focus:border-tan-500 transition-all duration-300 bg-white"
                 />
               </div>
               
@@ -220,7 +221,7 @@ export default function BookingPage() {
                   required
                   value={bookingData.clientEmail}
                   onChange={(e) => setBookingData({...bookingData, clientEmail: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-gold"
+                  className="w-full px-4 py-3 border border-tan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-500 focus:border-tan-500 transition-all duration-300 bg-white"
                 />
               </div>
               

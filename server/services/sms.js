@@ -41,26 +41,47 @@ async function sendSMS(to, message) {
 }
 
 async function sendBookingNotification(adminPhone, booking) {
-  const message = `New spray tan booking!
-📅 Date: ${booking.date}
-⏰ Time: ${booking.time}
-👤 Client: ${booking.clientName}
-📞 Phone: ${booking.clientPhone}
-✅ Payment: ${booking.paymentStatus}`
+  const message = `✨ Sunday Tan - New Booking Alert ✨
+
+📅 ${booking.date} at ${booking.time}
+👤 ${booking.clientName}
+📞 ${booking.clientPhone}
+💳 Payment: ${booking.paymentStatus}
+
+Time to make someone glow! ☀️`
 
   return await sendSMS(adminPhone, message)
 }
 
 async function sendConfirmationSMS(clientPhone, booking) {
-  const message = `Sunday Tan Booking Confirmed!
+  const message = `✨ Sunday Tan - Booking Confirmed ✨
+
+Your glow session is scheduled:
 📅 ${booking.date} at ${booking.time}
-We'll see you soon! If you need to reschedule, please call us.`
+
+We can't wait to help you achieve that perfect sun-kissed glow! ☀️
+
+Need to reschedule? Just give us a call!
+
+- The Sunday Tan Team`
 
   return await sendSMS(clientPhone, message)
 }
 
 async function sendReminderSMS(clientPhone, booking) {
-  const message = `Reminder: You have a spray tan appointment tomorrow at ${booking.time} with Sunday Tan. We're excited to see you!`
+  const message = `🌟 Tomorrow's the day for your glow-up! 🌟
+
+Sunday Tan Reminder:
+📅 Tomorrow at ${booking.time}
+
+Prep tips:
+• Exfoliate today
+• Wear loose, dark clothing
+• Arrive with clean, dry skin
+
+Ready to glow? We are! ✨
+
+- Sunday Tan`
 
   return await sendSMS(clientPhone, message)
 }
