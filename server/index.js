@@ -3,20 +3,20 @@ const mongoose = require('mongoose')
 const cors = require('cors')
 const helmet = require('helmet')
 const rateLimit = require('express-rate-limit')
-require('dotenv').config({ path: '../.env' })
+require('dotenv').config()
 
 const app = express()
 const PORT = process.env.PORT || 5000
 
 app.use(helmet())
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:3000',
+  origin: true,
   credentials: true
 }))
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 100
+  max: 1000  // Increased for development
 })
 app.use(limiter)
 
@@ -37,11 +37,15 @@ const { router: authRoutes } = require('./routes/auth')
 const bookingRoutes = require('./routes/bookings')
 const adminRoutes = require('./routes/admin')
 const slotRoutes = require('./routes/slots')
+const promocodeRoutes = require('./routes/promocodes')
+const paymentRoutes = require('./routes/payments')
 
 app.use('/api/auth', authRoutes)
 app.use('/api/bookings', bookingRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/slots', slotRoutes)
+app.use('/api/promocodes', promocodeRoutes)
+app.use('/api/payments', paymentRoutes)
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
@@ -53,5 +57,5 @@ app.use((err, req, res, next) => {
 })
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+  console.log(`Server running on port ${PORT} - CORS disabled for dev`)
 })
