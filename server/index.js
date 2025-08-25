@@ -8,6 +8,9 @@ require('dotenv').config()
 const app = express()
 const PORT = process.env.PORT || 5000
 
+// Trust proxy for Railway/cloud deployments
+app.set('trust proxy', true)
+
 app.use(helmet())
 app.use(cors({
   origin: true,
@@ -16,7 +19,10 @@ app.use(cors({
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 1000  // Increased for development
+  max: 1000,  // Increased for development
+  // Use default keyGenerator which will work with trust proxy
+  standardHeaders: true,
+  legacyHeaders: false
 })
 app.use(limiter)
 
