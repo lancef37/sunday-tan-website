@@ -63,11 +63,25 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 
+// Root endpoint for Railway
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Sunday Tan API Server',
+    status: 'Running',
+    endpoints: {
+      health: '/api/health',
+      bookings: '/api/bookings',
+      admin: '/api/admin',
+      slots: '/api/slots'
+    }
+  })
+})
+
 app.use((err, req, res, next) => {
   console.error(err.stack)
   res.status(500).json({ error: 'Something went wrong!' })
 })
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT} - CORS disabled for dev`)
+  console.log(`Server running on port ${PORT} - Environment: ${process.env.NODE_ENV || 'development'}`)
 })

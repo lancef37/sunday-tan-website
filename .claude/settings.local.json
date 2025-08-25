@@ -47,7 +47,9 @@
       "Bash(rm:*)",
       "WebFetch(domain:docs.anthropic.com)",
       "Bash(npm test:*)",
-      "Bash(mongod:*)"
+      "Bash(mongod:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot"
     ],
     "deny": []
   }
