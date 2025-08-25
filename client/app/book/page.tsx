@@ -1,10 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import axios from 'axios'
 import Calendar from 'react-calendar'
 import 'react-calendar/dist/Calendar.css'
 import SquarePaymentForm from '../../components/SquarePaymentForm'
+import ProtectedRoute from '../../components/ProtectedRoute'
 
 type ValuePiece = Date | null;
 type Value = ValuePiece | [ValuePiece, ValuePiece];
@@ -34,9 +36,11 @@ interface PromoCodeValidation {
 }
 
 export default function BookingPage() {
+  const router = useRouter()
   const [selectedDate, setSelectedDate] = useState<Value>(new Date())
   const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([])
   const [selectedTime, setSelectedTime] = useState<string>('')
+  const [user, setUser] = useState<any>(null)
   const [bookingData, setBookingData] = useState<BookingData>({
     date: '',
     time: '',
@@ -55,8 +59,54 @@ export default function BookingPage() {
   const [finalDepositAmount, setFinalDepositAmount] = useState(10)
   const [createdBooking, setCreatedBooking] = useState<any>(null)
   const [paymentResult, setPaymentResult] = useState<any>(null)
+  const [reservationSessionId, setReservationSessionId] = useState<string>('')
+  const [reservationExpiry, setReservationExpiry] = useState<Date | null>(null)
+  const [timeRemaining, setTimeRemaining] = useState<number>(0)
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL
+
+  useEffect(() => {
+    // Timer for reservation countdown
+    if (reservationExpiry) {
+      const timer = setInterval(() => {
+        const now = new Date()
+        const remaining = Math.max(0, reservationExpiry.getTime() - now.getTime())
+        setTimeRemaining(Math.floor(remaining / 1000))
+        
+        if (remaining <= 0) {
+          alert('Your reservation has expired. Please select a new time slot.')
+          resetBookingFlow()
+        }
+      }, 1000)
+      
+      return () => clearInterval(timer)
+    }
+  }, [reservationExpiry])
+
+  useEffect(() => {
+    // Check authentication and load user data
+    const checkAuth = () => {
+      const token = localStorage.getItem('token')
+      if (!token) {
+        router.push('/login?returnUrl=/book')
+        return
+      }
+      
+      const userData = localStorage.getItem('user')
+      if (userData) {
+        const parsedUser = JSON.parse(userData)
+        setUser(parsedUser)
+        setBookingData(prev => ({
+          ...prev,
+          clientName: parsedUser.name,
+          clientPhone: parsedUser.phone,
+          clientEmail: parsedUser.email
+        }))
+      }
+    }
+    
+    checkAuth()
+  }, [])
 
   useEffect(() => {
     if (selectedDate && selectedDate instanceof Date) {
@@ -175,50 +225,83 @@ export default function BookingPage() {
   const handleDetailsSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
-    // Prepare booking data with promocode
-    const finalBookingData = {
-      ...bookingData,
-      promoCode: promoValidation?.valid ? promoValidation.code : undefined
+    // Get auth token
+    const token = localStorage.getItem('token')
+    if (!token) {
+      router.push('/login?returnUrl=/book')
+      return
     }
     
-    // Create the booking first
+    // Prepare reservation data with promocode
+    const reservationData = {
+      date: bookingData.date,
+      time: bookingData.time,
+      smsConsent: bookingData.smsConsent,
+      promoCode: promoValidation?.valid ? promoValidation.code : undefined,
+      finalAmount: finalDepositAmount,
+      depositAmount: depositAmount
+    }
+    
+    // Create temporary reservation instead of booking
     setIsLoading(true)
     try {
-      console.log('About to send booking request to:', `${API_URL}/api/bookings`)
-      console.log('Booking data:', finalBookingData)
-      const response = await axios.post(`${API_URL}/api/bookings`, finalBookingData)
-      setCreatedBooking(response.data)
+      console.log('Creating reservation:', `${API_URL}/api/reservations/reserve`)
+      console.log('Reservation data:', reservationData)
+      const response = await axios.post(
+        `${API_URL}/api/reservations/reserve`, 
+        reservationData,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      
+      setReservationSessionId(response.data.sessionId)
+      setReservationExpiry(new Date(response.data.expiresAt))
+      console.log('Reservation created with session:', response.data.sessionId)
       
       // Skip payment if deposit is fully waived by promocode
       if (finalDepositAmount <= 0) {
-        // Apply the promocode to increment usage count
-        if (promoValidation?.valid && promoValidation.code) {
-          try {
-            await axios.post(`${API_URL}/api/promocodes/apply`, {
-              code: promoValidation.code
-            })
-          } catch (error) {
-            console.error('Error applying promocode:', error)
+        // Complete booking without payment
+        try {
+          const completeResponse = await axios.post(
+            `${API_URL}/api/reservations/complete`,
+            {
+              sessionId: response.data.sessionId,
+              paymentStatus: 'waived'
+            },
+            { headers: { Authorization: `Bearer ${token}` } }
+          )
+          
+          setCreatedBooking(completeResponse.data)
+          
+          // Apply the promocode to increment usage count
+          if (promoValidation?.valid && promoValidation.code) {
+            try {
+              await axios.post(`${API_URL}/api/promocodes/apply`, {
+                code: promoValidation.code
+              })
+            } catch (error) {
+              console.error('Error applying promocode:', error)
+            }
           }
+          
+          setPaymentResult({
+            success: true,
+            message: 'Deposit waived by promocode',
+            amount: 0
+          })
+          setStep('confirmation')
+        } catch (completeError) {
+          console.error('Error completing booking:', completeError)
+          alert('Failed to complete booking. Please try again.')
         }
-        
-        // Set fake payment result for deposit waived
-        setPaymentResult({
-          success: true,
-          message: 'Deposit waived by promocode',
-          amount: 0
-        })
-        setStep('confirmation')
       } else {
         setStep('payment')
       }
     } catch (error: any) {
-      console.error('Error creating booking:', error)
+      console.error('Error creating reservation:', error)
       console.error('Error response:', error.response?.data)
       console.error('Error status:', error.response?.status)
-      console.error('Booking data being sent:', bookingData)
       const errorMessage = error.response?.data?.error || error.message || 'Unknown error'
-      alert(`There was an error creating your booking: ${errorMessage}. Please try again.`)
+      alert(`There was an error reserving your time slot: ${errorMessage}. Please try again.`)
     } finally {
       setIsLoading(false)
     }
@@ -226,19 +309,33 @@ export default function BookingPage() {
 
   const handlePaymentSuccess = async (paymentData: any) => {
     setIsLoading(true)
+    const token = localStorage.getItem('token')
+    
     try {
-      const response = await axios.post(`${API_URL}/api/payments/process-deposit`, {
+      // First process the payment
+      const paymentResponse = await axios.post(`${API_URL}/api/payments/process-deposit`, {
         sourceId: paymentData.sourceId,
-        bookingId: createdBooking.booking._id,
         amount: finalDepositAmount,
         promoCode: promoValidation?.valid ? promoValidation.code : undefined
       })
       
-      setPaymentResult(response.data)
+      // Then complete the booking with the reservation
+      const completeResponse = await axios.post(
+        `${API_URL}/api/reservations/complete`,
+        {
+          sessionId: reservationSessionId,
+          paymentId: paymentResponse.data.paymentId,
+          paymentStatus: 'paid'
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      
+      setCreatedBooking(completeResponse.data)
+      setPaymentResult(paymentResponse.data)
       setStep('confirmation')
     } catch (error: any) {
-      console.error('Payment processing error:', error)
-      alert(error.response?.data?.message || 'Payment failed. Please try again.')
+      console.error('Payment/booking error:', error)
+      alert(error.response?.data?.message || 'Payment or booking failed. Please try again.')
     } finally {
       setIsLoading(false)
     }
@@ -250,6 +347,18 @@ export default function BookingPage() {
   }
 
   const resetBookingFlow = () => {
+    // Cancel any existing reservation
+    if (reservationSessionId) {
+      const token = localStorage.getItem('token')
+      if (token) {
+        axios.post(
+          `${API_URL}/api/reservations/cancel`,
+          { sessionId: reservationSessionId },
+          { headers: { Authorization: `Bearer ${token}` } }
+        ).catch(err => console.log('Failed to cancel reservation:', err))
+      }
+    }
+    
     setStep('calendar')
     setBookingData({
       date: '',
@@ -266,11 +375,13 @@ export default function BookingPage() {
     setFinalDepositAmount(depositAmount)
     setCreatedBooking(null)
     setPaymentResult(null)
+    setReservationSessionId('')
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-tan-50 via-tan-100 to-tan-200 py-8">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <ProtectedRoute>
+      <div className="min-h-screen bg-gradient-to-br from-tan-50 via-tan-100 to-tan-200 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-8">
           <h1 className="text-4xl font-serif font-light text-tan-900 mb-4">Book Your Session</h1>
           <p className="text-tan-600 mb-8">Schedule your professional spray tan experience</p>
@@ -347,43 +458,21 @@ export default function BookingPage() {
             </div>
             
             <form onSubmit={handleDetailsSubmit} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Full Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={bookingData.clientName}
-                  onChange={(e) => setBookingData({...bookingData, clientName: e.target.value})}
-                  className="w-full px-4 py-3 border border-tan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-500 focus:border-tan-500 transition-all duration-300 bg-white"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  required
-                  value={bookingData.clientPhone}
-                  onChange={(e) => setBookingData({...bookingData, clientPhone: e.target.value})}
-                  className="w-full px-4 py-3 border border-tan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-500 focus:border-tan-500 transition-all duration-300 bg-white"
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address *
-                </label>
-                <input
-                  type="email"
-                  required
-                  value={bookingData.clientEmail}
-                  onChange={(e) => setBookingData({...bookingData, clientEmail: e.target.value})}
-                  className="w-full px-4 py-3 border border-tan-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-500 focus:border-tan-500 transition-all duration-300 bg-white"
-                />
+              {/* User info display - read only */}
+              <div className="bg-gray-50 p-4 rounded-lg space-y-3">
+                <h3 className="text-sm font-medium text-gray-700 mb-2">Your Account Information</h3>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Name</label>
+                  <p className="text-gray-900 font-medium">{bookingData.clientName}</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Phone</label>
+                  <p className="text-gray-900 font-medium">{bookingData.clientPhone}</p>
+                </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Email</label>
+                  <p className="text-gray-900 font-medium">{bookingData.clientEmail}</p>
+                </div>
               </div>
               
               {/* Promocode Section */}
@@ -501,9 +590,22 @@ export default function BookingPage() {
           </div>
         )}
 
-        {step === 'payment' && createdBooking && (
+        {step === 'payment' && reservationSessionId && (
           <div className="card max-w-2xl mx-auto">
             <h2 className="text-xl font-semibold mb-6">Secure Payment</h2>
+            
+            {/* Reservation Timer */}
+            {timeRemaining > 0 && (
+              <div className={`p-3 rounded-lg mb-4 ${
+                timeRemaining < 60 ? 'bg-red-50 border border-red-200' : 'bg-blue-50 border border-blue-200'
+              }`}>
+                <p className={`text-sm font-medium ${
+                  timeRemaining < 60 ? 'text-red-700' : 'text-blue-700'
+                }`}>
+                  Time remaining to complete booking: {Math.floor(timeRemaining / 60)}:{(timeRemaining % 60).toString().padStart(2, '0')}
+                </p>
+              </div>
+            )}
             
             <div className="bg-tan-50 p-4 rounded-lg mb-6 border border-tan-200">
               <h3 className="font-semibold mb-2 text-tan-800">Booking Summary</h3>
@@ -531,7 +633,20 @@ export default function BookingPage() {
             <div className="flex space-x-4 pt-6">
               <button
                 type="button"
-                onClick={() => setStep('details')}
+                onClick={() => {
+                  // Cancel reservation when going back
+                  const token = localStorage.getItem('token')
+                  if (token && reservationSessionId) {
+                    axios.post(
+                      `${API_URL}/api/reservations/cancel`,
+                      { sessionId: reservationSessionId },
+                      { headers: { Authorization: `Bearer ${token}` } }
+                    ).catch(err => console.log('Failed to cancel reservation:', err))
+                  }
+                  setReservationSessionId('')
+                  setReservationExpiry(null)
+                  setStep('details')
+                }}
                 className="btn-secondary flex-1"
                 disabled={isLoading}
               >
@@ -615,7 +730,8 @@ export default function BookingPage() {
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </ProtectedRoute>
   )
 }

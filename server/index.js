@@ -34,18 +34,24 @@ db.once('open', () => {
 })
 
 const { router: authRoutes } = require('./routes/auth')
+const { router: userAuthRoutes } = require('./routes/userAuth')
 const bookingRoutes = require('./routes/bookings')
 const adminRoutes = require('./routes/admin')
 const slotRoutes = require('./routes/slots')
 const promocodeRoutes = require('./routes/promocodes')
 const paymentRoutes = require('./routes/payments')
+const { router: cancellationRoutes } = require('./routes/cancellations')
+const reservationRoutes = require('./routes/reservations')
 
 app.use('/api/auth', authRoutes)
+app.use('/api/auth/user', userAuthRoutes)
 app.use('/api/bookings', bookingRoutes)
 app.use('/api/admin', adminRoutes)
 app.use('/api/slots', slotRoutes)
 app.use('/api/promocodes', promocodeRoutes)
 app.use('/api/payments', paymentRoutes)
+app.use('/api/reservations', reservationRoutes)
+app.use('/api', cancellationRoutes)
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() })

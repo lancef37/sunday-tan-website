@@ -1,19 +1,27 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 export default function HomePage() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem('token')
+    setIsLoggedIn(!!token)
+  }, [])
   return (
     <div className="min-h-screen relative overflow-hidden">
-      {/* Beautiful Limewash Background Image */}
+      {/* Beautiful Tan Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: `url('/limewash-background.png')`,
+          backgroundImage: `url('/tan-background.png')`,
         }}
       >
         {/* Subtle overlay to ensure text readability */}
-        <div className="absolute inset-0 bg-black/5"></div>
+        <div className="absolute inset-0 bg-black/20"></div>
       </div>
       
       {/* Header */}
@@ -31,14 +39,17 @@ export default function HomePage() {
                 Home
               </Link>
               <Link href="/book" className="nav-link">
-                Services
+                Book Now
               </Link>
-              <Link href="/book" className="nav-link">
-                Contact
-              </Link>
-              <Link href="/admin" className="nav-link opacity-60">
-                Admin
-              </Link>
+              {isLoggedIn ? (
+                <Link href="/account" className="nav-link">
+                  My Account
+                </Link>
+              ) : (
+                <Link href="/login" className="nav-link">
+                  Login
+                </Link>
+              )}
             </nav>
           </div>
         </div>
@@ -48,14 +59,14 @@ export default function HomePage() {
       <div className="relative z-10 flex flex-col items-center justify-center min-h-[calc(100vh-140px)] px-6">
         <div className="max-w-5xl animate-fade-in">
           {/* Main heading with header font styling */}
-          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-semibold text-tan-900 mb-16 leading-[0.9] tracking-wide text-left">
-            <span className="block animate-slide-up" style={{animationDelay: '0.1s'}}>
+          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-semibold mb-16 leading-[0.9] tracking-wide text-left" style={{color: '#654321'}}>
+            <span className="block animate-slide-up" style={{animationDelay: '0.1s', color: '#654321'}}>
               REAL BODIES.
             </span>
-            <span className="block animate-slide-up" style={{animationDelay: '0.2s'}}>
+            <span className="block animate-slide-up" style={{animationDelay: '0.2s', color: '#654321'}}>
               FAKE TANS.
             </span>
-            <span className="block font-serif text-tan-900 animate-slide-up" style={{animationDelay: '0.3s'}}>
+            <span className="block font-serif animate-slide-up" style={{animationDelay: '0.3s', color: '#654321'}}>
               SUNDAY TAN.
             </span>
           </h1>

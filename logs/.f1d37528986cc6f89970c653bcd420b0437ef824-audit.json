@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": "C:\\Users\\lfrazer\\Desktop\\Sunday Tan Website\\logs\\.f1d37528986cc6f89970c653bcd420b0437ef824-audit.json",
+    "files": [
+        {
+            "date": 1756122820184,
+            "name": "C:\\Users\\lfrazer\\Desktop\\Sunday Tan Website\\logs\\mcp-puppeteer-2025-08-25.log",
+            "hash": "06a899f160678106b61232f5303c19a6cbba360380a8ebd651c30491e6de4688"
+        }
+    ],
+    "hashType": "sha256"
+}

@@ -16,7 +16,7 @@
 
 @layer components {
   .nav-link {
-    @apply text-tan-700 hover:text-tan-900 font-medium tracking-wide text-sm uppercase transition-all duration-300 relative;
+    @apply text-tan-700 hover:text-tan-900 font-medium tracking-wide text-lg uppercase transition-all duration-300 relative;
   }
   
   .nav-link::after {

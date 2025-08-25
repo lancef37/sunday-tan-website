@@ -14,6 +14,11 @@ const clientSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null
+  },
   appointments: [{
     date: {
       type: String,

@@ -20,6 +20,12 @@ interface Booking {
   notes?: string;
   actualRevenue?: number;
   completedAt?: string;
+  cancelledAt?: string;
+  cancellationReason?: string;
+  refundStatus?: string;
+  refundAmount?: number;
+  refundId?: string;
+  cancellationToken?: string;
   createdAt: string;
 }
 
@@ -1003,6 +1009,7 @@ export default function AdminPage() {
                         <th className="text-left py-3 px-2">Status</th>
                         <th className="text-left py-3 px-2">Promocode</th>
                         <th className="text-left py-3 px-2">Revenue</th>
+                        <th className="text-left py-3 px-2">Cancellation</th>
                         <th className="text-left py-3 px-2">Notes</th>
                         <th className="text-left py-3 px-2">Actions</th>
                       </tr>
@@ -1040,6 +1047,30 @@ export default function AdminPage() {
                               <span className="text-green-600 font-medium">
                                 ${booking.actualRevenue?.toFixed(2)}
                               </span>
+                            ) : (
+                              <span className="text-gray-400 text-sm">-</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-2">
+                            {booking.status === 'cancelled' && booking.cancelledAt ? (
+                              <div className="text-xs">
+                                <div className="text-red-600 font-medium">
+                                  Cancelled {new Date(booking.cancelledAt).toLocaleDateString()}
+                                </div>
+                                {booking.refundStatus && booking.refundStatus !== 'none' && (
+                                  <div className={`mt-1 ${
+                                    booking.refundStatus === 'processed' ? 'text-green-600' :
+                                    booking.refundStatus === 'failed' ? 'text-red-600' :
+                                    booking.refundStatus === 'not_applicable' ? 'text-blue-600' :
+                                    'text-orange-600'
+                                  }`}>
+                                    Refund: {booking.refundStatus === 'processed' ? `$${booking.refundAmount?.toFixed(2)} processed` :
+                                           booking.refundStatus === 'failed' ? 'Failed' :
+                                           booking.refundStatus === 'not_applicable' ? 'N/A (promo)' :
+                                           'Pending'}
+                                  </div>
+                                )}
+                              </div>
                             ) : (
                               <span className="text-gray-400 text-sm">-</span>
                             )}

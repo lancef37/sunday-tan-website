@@ -2,17 +2,26 @@ const express = require('express')
 const router = express.Router()
 const Booking = require('../models/Booking')
 const Client = require('../models/Client')
+const User = require('../models/User')
 const { sendSMS, sendBookingNotification, sendPendingBookingSMS, sendConfirmationSMS, sendDenialSMS } = require('../services/sms')
 const { createPayment } = require('../services/payment')
+const { authenticateUser } = require('./userAuth')
 
-router.post('/', async (req, res) => {
+router.post('/', authenticateUser, async (req, res) => {
   try {
     console.log('Booking request received:', req.body)
-    const { date, time, clientName, clientPhone, clientEmail, smsConsent, promoCode } = req.body
+    console.log('User making booking:', req.user.email)
+    const { date, time, smsConsent, promoCode } = req.body
+    
+    // Get user details from authenticated user
+    const clientName = req.user.name
+    const clientPhone = req.user.phone
+    const clientEmail = req.user.email
+    const userId = req.user._id
 
     // Validate required fields
-    if (!date || !time || !clientName || !clientPhone || !clientEmail) {
-      return res.status(400).json({ error: 'All fields are required' })
+    if (!date || !time) {
+      return res.status(400).json({ error: 'Date and time are required' })
     }
 
     // Validate SMS consent
@@ -31,6 +40,7 @@ router.post('/', async (req, res) => {
     const booking = new Booking({
       date,
       time,
+      userId,
       clientName,
       clientPhone,
       clientEmail,
@@ -43,16 +53,27 @@ router.post('/', async (req, res) => {
 
     // Handle client record
     console.log('Processing client record...')
-    let client = await Client.findOne({ phone: clientPhone })
+    let client = await Client.findOne({ userId: userId })
     if (!client) {
-      console.log('Creating new client...')
-      client = new Client({
-        name: clientName,
-        phone: clientPhone,
-        email: clientEmail
-      })
-      await client.save()
-      console.log('New client created:', client._id)
+      // Check if there's an existing client with same phone (legacy data)
+      client = await Client.findOne({ phone: clientPhone })
+      if (client) {
+        // Link existing client to user
+        client.userId = userId
+        await client.save()
+        console.log('Linked existing client to user:', client._id)
+      } else {
+        // Create new client
+        console.log('Creating new client...')
+        client = new Client({
+          name: clientName,
+          phone: clientPhone,
+          email: clientEmail,
+          userId: userId
+        })
+        await client.save()
+        console.log('New client created:', client._id)
+      }
     }
 
     // Update client appointments
@@ -95,6 +116,19 @@ router.post('/', async (req, res) => {
   }
 })
 
+// Get user's bookings
+router.get('/my-bookings', authenticateUser, async (req, res) => {
+  try {
+    const bookings = await Booking.find({ userId: req.user._id })
+      .sort({ date: -1, time: -1 })
+    res.json(bookings)
+  } catch (error) {
+    console.error('Error fetching user bookings:', error)
+    res.status(500).json({ error: 'Failed to fetch bookings' })
+  }
+})
+
+// Admin route to get all bookings
 router.get('/', async (req, res) => {
   try {
     const bookings = await Booking.find()

@@ -10,6 +10,7 @@ const Expense = require('../models/Expense')
 const PromoCode = require('../models/PromoCode')
 const { sendConfirmationSMS, sendDenialSMS } = require('../services/sms')
 const { createPayment } = require('../services/payment')
+const { generateCancellationToken } = require('./cancellations')
 
 const authenticateAdmin = (req, res, next) => {
   const token = req.header('Authorization')?.replace('Bearer ', '')
@@ -485,6 +486,17 @@ router.post('/bookings/:id/approve', authenticateAdmin, async (req, res) => {
     // Update booking status to confirmed
     booking.status = 'confirmed'
     await booking.save()
+    
+    // Generate cancellation token for confirmed booking
+    try {
+      const cancellationToken = await generateCancellationToken(booking._id)
+      console.log(`Generated cancellation token for booking ${booking._id}:`, cancellationToken)
+      // Update the booking object with the token for SMS
+      booking.cancellationToken = cancellationToken
+    } catch (tokenError) {
+      console.error('Failed to generate cancellation token:', tokenError)
+      // Continue with approval even if token generation fails
+    }
     
     // Send confirmation SMS to client
     try {
