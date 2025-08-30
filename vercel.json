@@ -1,16 +1,4 @@
 {
-  "buildCommand": "cd client && npm install && npm run build",
-  "outputDirectory": "client/.next",
-  "installCommand": "npm install",
   "framework": "nextjs",
-  "rewrites": [
-    {
-      "source": "/(.*)",
-      "destination": "/client/$1"
-    }
-  ],
-  "env": {
-    "NEXT_PUBLIC_API_URL": "https://sunday-tan-website-production.up.railway.app",
-    "NEXT_PUBLIC_APP_URL": "https://sunday-tan-website.vercel.app"
-  }
+  "rootDirectory": "client"
 }
