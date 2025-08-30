@@ -1020,274 +1020,252 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* Dashboard Tab */}
+        {/* Dashboard Tab - Appointment Schedule */}
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
             {isLoading ? (
-              <div className="text-center py-8">Loading dashboard data...</div>
-            ) : !stats ? (
-              <div className="text-center py-8">
-                <p className="text-red-600">Failed to load dashboard data.</p>
-                <button onClick={fetchData} className="btn-primary mt-4">Retry</button>
-              </div>
+              <div className="text-center py-8">Loading appointments...</div>
             ) : (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                  <div className="card bg-gradient-to-r from-green-500 to-green-600 text-white">
-                    <h3 className="text-lg font-medium">This Week</h3>
-                    <p className="text-3xl font-bold">{stats.appointments.thisWeek}</p>
-                    <p className="text-green-100">completed appointments</p>
-                  </div>
-                  <div className="card bg-gradient-to-r from-blue-500 to-blue-600 text-white">
-                    <h3 className="text-lg font-medium">This Month</h3>
-                    <p className="text-3xl font-bold">{stats.appointments.thisMonth}</p>
-                    <p className="text-blue-100">completed appointments</p>
-                  </div>
-                  <div className="card bg-gradient-to-r from-purple-500 to-purple-600 text-white">
-                    <h3 className="text-lg font-medium">This Year</h3>
-                    <p className="text-3xl font-bold">{stats.appointments.thisYear}</p>
-                    <p className="text-purple-100">completed appointments</p>
-                  </div>
-                  <div className="card bg-gradient-to-r from-tan-600 to-tan-700 text-white">
-                    <h3 className="text-lg font-medium">Total Clients</h3>
-                    <p className="text-3xl font-bold">{stats.totalClients}</p>
-                    <p className="text-tan-100">registered</p>
-                  </div>
-                </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Revenue Overview */}
-              <div className="card">
-                <h3 className="text-xl font-semibold mb-4">Revenue Collected</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                    <span className="font-medium">This Week</span>
-                    <span className="text-green-600 font-bold">${stats.revenue.thisWeek.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
-                    <span className="font-medium">This Month</span>
-                    <span className="text-blue-600 font-bold">${stats.revenue.thisMonth.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                    <span className="font-medium">This Year</span>
-                    <span className="text-purple-600 font-bold">${stats.revenue.thisYear.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Expenses Overview */}
-              <div className="card">
-                <h3 className="text-xl font-semibold mb-4">Expenses</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                    <span className="font-medium">This Week</span>
-                    <span className="text-red-600 font-bold">-${stats.expenses.thisWeek.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                    <span className="font-medium">This Month</span>
-                    <span className="text-red-600 font-bold">-${stats.expenses.thisMonth.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
-                    <span className="font-medium">This Year</span>
-                    <span className="text-red-600 font-bold">-${stats.expenses.thisYear.toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Net Profit */}
-              <div className="card">
-                <h3 className="text-xl font-semibold mb-4">Net Profit</h3>
-                <div className="space-y-3">
-                  <div className={`flex justify-between items-center p-3 rounded-lg ${
-                    stats.netRevenue.thisWeek >= 0 ? 'bg-emerald-50' : 'bg-red-50'
-                  }`}>
-                    <span className="font-medium">This Week</span>
-                    <span className={`font-bold ${
-                      stats.netRevenue.thisWeek >= 0 ? 'text-emerald-600' : 'text-red-600'
-                    }`}>
-                      ${stats.netRevenue.thisWeek.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className={`flex justify-between items-center p-3 rounded-lg ${
-                    stats.netRevenue.thisMonth >= 0 ? 'bg-emerald-50' : 'bg-red-50'
-                  }`}>
-                    <span className="font-medium">This Month</span>
-                    <span className={`font-bold ${
-                      stats.netRevenue.thisMonth >= 0 ? 'text-emerald-600' : 'text-red-600'
-                    }`}>
-                      ${stats.netRevenue.thisMonth.toFixed(2)}
-                    </span>
-                  </div>
-                  <div className={`flex justify-between items-center p-3 rounded-lg ${
-                    stats.netRevenue.thisYear >= 0 ? 'bg-emerald-50' : 'bg-red-50'
-                  }`}>
-                    <span className="font-medium">This Year</span>
-                    <span className={`font-bold ${
-                      stats.netRevenue.thisYear >= 0 ? 'text-emerald-600' : 'text-red-600'
-                    }`}>
-                      ${stats.netRevenue.thisYear.toFixed(2)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Membership Analytics */}
-            <div className="card col-span-1 lg:col-span-2">
-              <h3 className="text-xl font-semibold mb-4">Membership Analytics</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-purple-700">Active Members</span>
-                    <span className="text-2xl font-bold text-purple-900">{stats.membershipStats?.activeMembers || 0}</span>
-                  </div>
-                  <div className="text-xs text-purple-600">
-                    Monthly Recurring Revenue
-                  </div>
-                  <div className="text-lg font-bold text-purple-800">
-                    ${stats.membershipStats?.mrr?.toFixed(2) || '0.00'}/mo
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
-                  <div className="text-sm font-medium text-indigo-700 mb-2">Membership Revenue</div>
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="text-xs text-indigo-600">Subscriptions:</span>
-                      <span className="text-sm font-bold text-indigo-800">
-                        ${stats.membershipRevenue?.subscription?.thisMonth?.toFixed(2) || '0.00'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-xs text-indigo-600">Additional Tans:</span>
-                      <span className="text-sm font-bold text-indigo-800">
-                        ${stats.membershipRevenue?.additionalTans?.thisMonth?.toFixed(2) || '0.00'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-xs text-indigo-600">Tips:</span>
-                      <span className="text-sm font-bold text-indigo-800">
-                        ${stats.membershipRevenue?.tips?.thisMonth?.toFixed(2) || '0.00'}
-                      </span>
-                    </div>
-                    <div className="border-t border-indigo-300 pt-1 mt-1">
-                      <div className="flex justify-between">
-                        <span className="text-xs font-medium text-indigo-700">Total:</span>
-                        <span className="text-sm font-bold text-indigo-900">
-                          ${stats.membershipRevenue?.thisMonth?.toFixed(2) || '0.00'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                
-                <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200">
-                  <div className="text-sm font-medium text-emerald-700 mb-2">Revenue Breakdown</div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-emerald-600">Service Revenue:</span>
-                      <span className="text-sm font-bold text-emerald-800">
-                        ${stats.serviceRevenue?.thisMonth?.toFixed(2) || '0.00'}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs text-emerald-600">Membership Revenue:</span>
-                      <span className="text-sm font-bold text-emerald-800">
-                        ${stats.membershipRevenue?.thisMonth?.toFixed(2) || '0.00'}
-                      </span>
-                    </div>
-                    <div className="mt-2">
-                      <div className="flex h-3 rounded-full overflow-hidden bg-gray-200">
-                        <div 
-                          className="bg-emerald-500" 
-                          style={{
-                            width: `${stats.serviceRevenue && stats.membershipRevenue 
-                              ? (stats.serviceRevenue.thisMonth / (stats.serviceRevenue.thisMonth + stats.membershipRevenue.thisMonth) * 100)
-                              : 100}%`
-                          }}
-                        />
-                        <div 
-                          className="bg-purple-500"
-                          style={{
-                            width: `${stats.serviceRevenue && stats.membershipRevenue 
-                              ? (stats.membershipRevenue.thisMonth / (stats.serviceRevenue.thisMonth + stats.membershipRevenue.thisMonth) * 100)
-                              : 0}%`
-                          }}
-                        />
-                      </div>
-                      <div className="flex justify-between text-xs mt-1">
-                        <span className="text-emerald-600">Service</span>
-                        <span className="text-purple-600">Membership</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Top Clients */}
-            <div className="card">
-              <h3 className="text-xl font-semibold mb-4">Best Clients</h3>
-              <div className="space-y-2">
-                {stats.topClients.slice(0, 5).map((client, index) => (
-                  <div 
-                    key={client._id} 
-                    className="flex justify-between items-center p-3 bg-tan-50 rounded-lg cursor-pointer hover:bg-tan-100 transition-colors"
-                    onClick={() => {
-                      setActiveTab('clients')
-                      fetchClientDetails(client._id)
-                    }}
-                  >
+                {/* Today's Appointments */}
+                <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6">
+                  <div className="flex items-center justify-between mb-6">
                     <div>
-                      <span className="font-medium">{client.name}</span>
-                      <span className="text-sm text-gray-600 ml-2">#{index + 1}</span>
+                      <h2 className="text-2xl font-serif font-semibold text-tan-900">Today's Schedule</h2>
+                      <p className="text-tan-600 mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</p>
                     </div>
-                    <span className="text-tan-700 font-bold">{client.totalAppointments} appointments</span>
+                    <div className="bg-tan-100 px-4 py-2 rounded-lg">
+                      <span className="text-2xl font-bold text-tan-700">
+                        {bookings.filter(b => {
+                          const today = new Date()
+                          const bookingDate = new Date(b.date)
+                          return bookingDate.toDateString() === today.toDateString() && 
+                                 ['pending', 'confirmed'].includes(b.status)
+                        }).length}
+                      </span>
+                      <span className="text-tan-600 ml-2">appointments</span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Recent Bookings */}
-            <div className="card">
-              <h3 className="text-xl font-semibold mb-4">Recent Bookings</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="border-b border-tan-200">
-                      <th className="text-left py-3 px-2">Date</th>
-                      <th className="text-left py-3 px-2">Time</th>
-                      <th className="text-left py-3 px-2">Client</th>
-                      <th className="text-left py-3 px-2">Status</th>
-                      <th className="text-left py-3 px-2">Revenue</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {bookings.slice(0, 5).map((booking) => (
-                      <tr key={booking._id} className="border-b border-tan-100 hover:bg-tan-50">
-                        <td className="py-3 px-2">{formatDate(booking.date)}</td>
-                        <td className="py-3 px-2">{formatTime(booking.time)}</td>
-                        <td className="py-3 px-2">{booking.clientName}</td>
-                        <td className="py-3 px-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
-                            {booking.status}
-                          </span>
-                        </td>
-                        <td className="py-3 px-2">
-                          {booking.status === 'completed' && booking.actualRevenue !== null ? (
-                            <span className="text-green-600 font-medium text-sm">
-                              ${booking.actualRevenue?.toFixed(2)}
+                  
+                  <div className="space-y-3">
+                    {bookings
+                      .filter(b => {
+                        const today = new Date()
+                        const bookingDate = new Date(b.date)
+                        return bookingDate.toDateString() === today.toDateString() && 
+                               ['pending', 'confirmed'].includes(b.status)
+                      })
+                      .sort((a, b) => a.time.localeCompare(b.time))
+                      .map(booking => (
+                        <div key={booking._id} className="flex items-center justify-between p-4 bg-gradient-to-r from-tan-50 to-amber-50 rounded-lg hover:shadow-md transition-all duration-200">
+                          <div className="flex items-center gap-4">
+                            <div className="bg-white p-3 rounded-full shadow-sm">
+                              <svg className="w-5 h-5 text-tan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div>
+                              <p className="font-semibold text-lg text-tan-900">{formatTime(booking.time)}</p>
+                              <p className="text-tan-700">{booking.clientName}</p>
+                              <p className="text-sm text-tan-600">{booking.clientPhone}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            {booking.membershipApplied && (
+                              <span className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Member</span>
+                            )}
+                            <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                              booking.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                            }`}>
+                              {booking.status === 'confirmed' ? '✓ Confirmed' : 'Pending'}
                             </span>
-                          ) : (
-                            <span className="text-gray-400 text-sm">-</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                          </div>
+                        </div>
+                      ))}
+                    {bookings.filter(b => {
+                      const today = new Date()
+                      const bookingDate = new Date(b.date)
+                      return bookingDate.toDateString() === today.toDateString() && 
+                             ['pending', 'confirmed'].includes(b.status)
+                    }).length === 0 && (
+                      <div className="text-center py-8 text-tan-600">
+                        <svg className="w-16 h-16 mx-auto text-tan-300 mb-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <p className="text-lg">No appointments scheduled for today</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* This Week's Appointments */}
+                <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-2xl font-serif font-semibold text-tan-900">This Week</h2>
+                      <p className="text-tan-600 mt-1">
+                        {(() => {
+                          const now = new Date()
+                          const startOfWeek = new Date(now)
+                          const endOfWeek = new Date(now)
+                          startOfWeek.setDate(now.getDate() - now.getDay())
+                          endOfWeek.setDate(startOfWeek.getDate() + 6)
+                          return `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                        })()}
+                      </p>
+                    </div>
+                    <div className="bg-tan-100 px-4 py-2 rounded-lg">
+                      <span className="text-2xl font-bold text-tan-700">
+                        {bookings.filter(b => {
+                          const bookingDate = new Date(b.date)
+                          const now = new Date()
+                          const startOfWeek = new Date(now)
+                          const endOfWeek = new Date(now)
+                          startOfWeek.setDate(now.getDate() - now.getDay())
+                          endOfWeek.setDate(startOfWeek.getDate() + 6)
+                          endOfWeek.setHours(23, 59, 59, 999)
+                          return bookingDate >= startOfWeek && bookingDate <= endOfWeek && 
+                                 ['pending', 'confirmed'].includes(b.status)
+                        }).length}
+                      </span>
+                      <span className="text-tan-600 ml-2">appointments</span>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {(() => {
+                      const weekAppointments = bookings.filter(b => {
+                        const bookingDate = new Date(b.date)
+                        const now = new Date()
+                        const startOfWeek = new Date(now)
+                        const endOfWeek = new Date(now)
+                        startOfWeek.setDate(now.getDate() - now.getDay())
+                        endOfWeek.setDate(startOfWeek.getDate() + 6)
+                        endOfWeek.setHours(23, 59, 59, 999)
+                        return bookingDate >= startOfWeek && bookingDate <= endOfWeek && 
+                               ['pending', 'confirmed'].includes(b.status)
+                      }).sort((a, b) => {
+                        const dateA = new Date(`${a.date} ${a.time}`)
+                        const dateB = new Date(`${b.date} ${b.time}`)
+                        return dateA.getTime() - dateB.getTime()
+                      })
+                      
+                      const groupedByDate = weekAppointments.reduce((acc, booking) => {
+                        const date = booking.date
+                        if (!acc[date]) acc[date] = []
+                        acc[date].push(booking)
+                        return acc
+                      }, {} as Record<string, typeof weekAppointments>)
+                      
+                      return Object.entries(groupedByDate).map(([date, dayBookings]) => (
+                        <div key={date} className="bg-gradient-to-b from-tan-50 to-white rounded-lg p-4 border border-tan-200">
+                          <h3 className="font-semibold text-tan-900 mb-3">
+                            {new Date(date).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                          </h3>
+                          <div className="space-y-2">
+                            {dayBookings.map(booking => (
+                              <div key={booking._id} className="text-sm">
+                                <p className="font-medium text-tan-800">{formatTime(booking.time)} - {booking.clientName}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                    })()}
+                  </div>
+                  {bookings.filter(b => {
+                    const bookingDate = new Date(b.date)
+                    const now = new Date()
+                    const startOfWeek = new Date(now)
+                    const endOfWeek = new Date(now)
+                    startOfWeek.setDate(now.getDate() - now.getDay())
+                    endOfWeek.setDate(startOfWeek.getDate() + 6)
+                    endOfWeek.setHours(23, 59, 59, 999)
+                    return bookingDate >= startOfWeek && bookingDate <= endOfWeek && 
+                           ['pending', 'confirmed'].includes(b.status)
+                  }).length === 0 && (
+                    <div className="text-center py-8 text-tan-600">
+                      <p className="text-lg">No appointments scheduled this week</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* This Month's Appointments */}
+                <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h2 className="text-2xl font-serif font-semibold text-tan-900">This Month</h2>
+                      <p className="text-tan-600 mt-1">{new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                    </div>
+                    <div className="bg-tan-100 px-4 py-2 rounded-lg">
+                      <span className="text-2xl font-bold text-tan-700">
+                        {bookings.filter(b => {
+                          const bookingDate = new Date(b.date)
+                          const now = new Date()
+                          return bookingDate.getMonth() === now.getMonth() && 
+                                 bookingDate.getFullYear() === now.getFullYear() && 
+                                 ['pending', 'confirmed'].includes(b.status)
+                        }).length}
+                      </span>
+                      <span className="text-tan-600 ml-2">appointments</span>
+                    </div>
+                  </div>
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead>
+                        <tr className="border-b border-tan-200">
+                          <th className="text-left py-3 px-2 text-tan-700">Date</th>
+                          <th className="text-left py-3 px-2 text-tan-700">Time</th>
+                          <th className="text-left py-3 px-2 text-tan-700">Client</th>
+                          <th className="text-left py-3 px-2 text-tan-700">Phone</th>
+                          <th className="text-left py-3 px-2 text-tan-700">Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {bookings
+                          .filter(b => {
+                            const bookingDate = new Date(b.date)
+                            const now = new Date()
+                            return bookingDate.getMonth() === now.getMonth() && 
+                                   bookingDate.getFullYear() === now.getFullYear() && 
+                                   ['pending', 'confirmed'].includes(b.status)
+                          })
+                          .sort((a, b) => {
+                            const dateA = new Date(`${a.date} ${a.time}`)
+                            const dateB = new Date(`${b.date} ${b.time}`)
+                            return dateA.getTime() - dateB.getTime()
+                          })
+                          .map(booking => (
+                            <tr key={booking._id} className="border-b border-tan-100 hover:bg-tan-50 transition-colors">
+                              <td className="py-3 px-2">{formatDate(booking.date)}</td>
+                              <td className="py-3 px-2 font-medium">{formatTime(booking.time)}</td>
+                              <td className="py-3 px-2">{booking.clientName}</td>
+                              <td className="py-3 px-2 text-tan-600">{booking.clientPhone}</td>
+                              <td className="py-3 px-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  booking.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
+                                }`}>
+                                  {booking.status === 'confirmed' ? 'Confirmed' : 'Pending'}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                      </tbody>
+                    </table>
+                    {bookings.filter(b => {
+                      const bookingDate = new Date(b.date)
+                      const now = new Date()
+                      return bookingDate.getMonth() === now.getMonth() && 
+                             bookingDate.getFullYear() === now.getFullYear() && 
+                             ['pending', 'confirmed'].includes(b.status)
+                    }).length === 0 && (
+                      <div className="text-center py-8 text-tan-600">
+                        <p className="text-lg">No appointments scheduled this month</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
             </>
             )}
           </div>
@@ -2909,28 +2887,174 @@ export default function AdminPage() {
                 </div>
               </div>
               
-              {/* Summary Cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
-                <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">This Week</span>
-                    <span className="text-2xl font-bold text-green-600">{stats.appointments.thisWeek}</span>
+              {/* Revenue & Financial Summary */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+                {/* Revenue Overview */}
+                <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6">
+                  <h3 className="text-xl font-semibold mb-4">Revenue Collected</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                      <span className="font-medium">This Week</span>
+                      <span className="text-green-600 font-bold">${stats.revenue.thisWeek.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                      <span className="font-medium">This Month</span>
+                      <span className="text-blue-600 font-bold">${stats.revenue.thisMonth.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
+                      <span className="font-medium">This Year</span>
+                      <span className="text-purple-600 font-bold">${stats.revenue.thisYear.toFixed(2)}</span>
+                    </div>
                   </div>
-                  <p className="text-sm text-green-700">Revenue: ${stats.revenue.thisWeek}</p>
                 </div>
-                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">This Month</span>
-                    <span className="text-2xl font-bold text-blue-600">{stats.appointments.thisMonth}</span>
+
+                {/* Expenses Overview */}
+                <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6">
+                  <h3 className="text-xl font-semibold mb-4">Expenses</h3>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                      <span className="font-medium">This Week</span>
+                      <span className="text-red-600 font-bold">-${stats.expenses.thisWeek.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                      <span className="font-medium">This Month</span>
+                      <span className="text-red-600 font-bold">-${stats.expenses.thisMonth.toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between items-center p-3 bg-red-50 rounded-lg">
+                      <span className="font-medium">This Year</span>
+                      <span className="text-red-600 font-bold">-${stats.expenses.thisYear.toFixed(2)}</span>
+                    </div>
                   </div>
-                  <p className="text-sm text-blue-700">Revenue: ${stats.revenue.thisMonth}</p>
                 </div>
-                <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">This Year</span>
-                    <span className="text-2xl font-bold text-purple-600">{stats.appointments.thisYear}</span>
+
+                {/* Net Profit */}
+                <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6">
+                  <h3 className="text-xl font-semibold mb-4">Net Profit</h3>
+                  <div className="space-y-3">
+                    <div className={`flex justify-between items-center p-3 rounded-lg ${
+                      stats.netRevenue.thisWeek >= 0 ? 'bg-emerald-50' : 'bg-red-50'
+                    }`}>
+                      <span className="font-medium">This Week</span>
+                      <span className={`font-bold ${
+                        stats.netRevenue.thisWeek >= 0 ? 'text-emerald-600' : 'text-red-600'
+                      }`}>
+                        ${stats.netRevenue.thisWeek.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className={`flex justify-between items-center p-3 rounded-lg ${
+                      stats.netRevenue.thisMonth >= 0 ? 'bg-emerald-50' : 'bg-red-50'
+                    }`}>
+                      <span className="font-medium">This Month</span>
+                      <span className={`font-bold ${
+                        stats.netRevenue.thisMonth >= 0 ? 'text-emerald-600' : 'text-red-600'
+                      }`}>
+                        ${stats.netRevenue.thisMonth.toFixed(2)}
+                      </span>
+                    </div>
+                    <div className={`flex justify-between items-center p-3 rounded-lg ${
+                      stats.netRevenue.thisYear >= 0 ? 'bg-emerald-50' : 'bg-red-50'
+                    }`}>
+                      <span className="font-medium">This Year</span>
+                      <span className={`font-bold ${
+                        stats.netRevenue.thisYear >= 0 ? 'text-emerald-600' : 'text-red-600'
+                      }`}>
+                        ${stats.netRevenue.thisYear.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
-                  <p className="text-sm text-purple-700">Revenue: ${stats.revenue.thisYear}</p>
+                </div>
+              </div>
+
+              {/* Membership Analytics */}
+              <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6 mt-6">
+                <h3 className="text-xl font-semibold mb-4">Membership Analytics</h3>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-purple-700">Active Members</span>
+                      <span className="text-2xl font-bold text-purple-900">{stats.membershipStats?.activeMembers || 0}</span>
+                    </div>
+                    <div className="text-xs text-purple-600">
+                      Monthly Recurring Revenue
+                    </div>
+                    <div className="text-lg font-bold text-purple-800">
+                      ${stats.membershipStats?.mrr?.toFixed(2) || '0.00'}/mo
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-indigo-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
+                    <div className="text-sm font-medium text-indigo-700 mb-2">Membership Revenue</div>
+                    <div className="space-y-1">
+                      <div className="flex justify-between">
+                        <span className="text-xs text-indigo-600">Subscriptions:</span>
+                        <span className="text-sm font-bold text-indigo-800">
+                          ${stats.membershipRevenue?.subscription?.thisMonth?.toFixed(2) || '0.00'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-xs text-indigo-600">Additional Tans:</span>
+                        <span className="text-sm font-bold text-indigo-800">
+                          ${stats.membershipRevenue?.additionalTans?.thisMonth?.toFixed(2) || '0.00'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-xs text-indigo-600">Tips:</span>
+                        <span className="text-sm font-bold text-indigo-800">
+                          ${stats.membershipRevenue?.tips?.thisMonth?.toFixed(2) || '0.00'}
+                        </span>
+                      </div>
+                      <div className="border-t border-indigo-300 pt-1 mt-1">
+                        <div className="flex justify-between">
+                          <span className="text-xs font-medium text-indigo-700">Total:</span>
+                          <span className="text-sm font-bold text-indigo-900">
+                            ${stats.membershipRevenue?.thisMonth?.toFixed(2) || '0.00'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-gradient-to-r from-emerald-50 to-emerald-100 p-4 rounded-lg border border-emerald-200">
+                    <div className="text-sm font-medium text-emerald-700 mb-2">Revenue Breakdown</div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-emerald-600">Service Revenue:</span>
+                        <span className="text-sm font-bold text-emerald-800">
+                          ${stats.serviceRevenue?.thisMonth?.toFixed(2) || '0.00'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-emerald-600">Membership Revenue:</span>
+                        <span className="text-sm font-bold text-emerald-800">
+                          ${stats.membershipRevenue?.thisMonth?.toFixed(2) || '0.00'}
+                        </span>
+                      </div>
+                      <div className="mt-2">
+                        <div className="flex h-3 rounded-full overflow-hidden bg-gray-200">
+                          <div 
+                            className="bg-emerald-500" 
+                            style={{
+                              width: `${stats.serviceRevenue && stats.membershipRevenue 
+                                ? (stats.serviceRevenue.thisMonth / (stats.serviceRevenue.thisMonth + stats.membershipRevenue.thisMonth) * 100)
+                                : 100}%`
+                            }}
+                          />
+                          <div 
+                            className="bg-purple-500"
+                            style={{
+                              width: `${stats.serviceRevenue && stats.membershipRevenue 
+                                ? (stats.membershipRevenue.thisMonth / (stats.serviceRevenue.thisMonth + stats.membershipRevenue.thisMonth) * 100)
+                                : 0}%`
+                            }}
+                          />
+                        </div>
+                        <div className="flex justify-between text-xs mt-1">
+                          <span className="text-emerald-600">Service</span>
+                          <span className="text-purple-600">Membership</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 

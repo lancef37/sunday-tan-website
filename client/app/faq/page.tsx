@@ -25,7 +25,7 @@ export default function FAQPage() {
     },
     {
       question: 'How does the membership work?',
-      answer: 'Joining the Sunday Club comes with many perks besides maintaining your glow year-round! For a monthly subscription (cancel anytime) of $105, members have access to two free tans per month with no deposit required at the time of booking. Every additional tan in a given month is only $40. Sunday Club members also get %10 off products like my take-home foam solution!'
+      answer: 'Joining the Sunday Club comes with many perks besides maintaining your glow year-round! For a monthly subscription (cancel anytime) of $105, members have access to two free tans per month with no deposit required at the time of booking. Every additional tan in a given month is only $40. Sunday Club members also get %10 off products like my take-home foam solution! Any tans booked prior to becoming a member are treated as non-member tans, but you can always cancel and rebook as a member!'
     },
     {
       question: 'What happens if I cancel an appointment?',
