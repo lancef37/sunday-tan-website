@@ -1098,19 +1098,18 @@ export default function AdminPage() {
                   </div>
                 </div>
 
-                {/* This Week's Appointments */}
+                {/* Next 7 Days Appointments */}
                 <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-2xl font-serif font-semibold text-tan-900">This Week</h2>
+                      <h2 className="text-2xl font-serif font-semibold text-tan-900">Next 7 Days</h2>
                       <p className="text-tan-600 mt-1">
                         {(() => {
-                          const now = new Date()
-                          const startOfWeek = new Date(now)
-                          const endOfWeek = new Date(now)
-                          startOfWeek.setDate(now.getDate() - now.getDay())
-                          endOfWeek.setDate(startOfWeek.getDate() + 6)
-                          return `${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                          const tomorrow = new Date()
+                          tomorrow.setDate(tomorrow.getDate() + 1)
+                          const next7Days = new Date()
+                          next7Days.setDate(next7Days.getDate() + 7)
+                          return `${tomorrow.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${next7Days.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
                         })()}
                       </p>
                     </div>
@@ -1118,13 +1117,13 @@ export default function AdminPage() {
                       <span className="text-2xl font-bold text-tan-700">
                         {bookings.filter(b => {
                           const bookingDate = new Date(b.date)
-                          const now = new Date()
-                          const startOfWeek = new Date(now)
-                          const endOfWeek = new Date(now)
-                          startOfWeek.setDate(now.getDate() - now.getDay())
-                          endOfWeek.setDate(startOfWeek.getDate() + 6)
-                          endOfWeek.setHours(23, 59, 59, 999)
-                          return bookingDate >= startOfWeek && bookingDate <= endOfWeek && 
+                          const tomorrow = new Date()
+                          tomorrow.setDate(tomorrow.getDate() + 1)
+                          tomorrow.setHours(0, 0, 0, 0)
+                          const next7Days = new Date()
+                          next7Days.setDate(next7Days.getDate() + 7)
+                          next7Days.setHours(23, 59, 59, 999)
+                          return bookingDate >= tomorrow && bookingDate <= next7Days && 
                                  ['pending', 'confirmed'].includes(b.status)
                         }).length}
                       </span>
@@ -1132,17 +1131,17 @@ export default function AdminPage() {
                     </div>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                     {(() => {
-                      const weekAppointments = bookings.filter(b => {
+                      const next7DaysAppointments = bookings.filter(b => {
                         const bookingDate = new Date(b.date)
-                        const now = new Date()
-                        const startOfWeek = new Date(now)
-                        const endOfWeek = new Date(now)
-                        startOfWeek.setDate(now.getDate() - now.getDay())
-                        endOfWeek.setDate(startOfWeek.getDate() + 6)
-                        endOfWeek.setHours(23, 59, 59, 999)
-                        return bookingDate >= startOfWeek && bookingDate <= endOfWeek && 
+                        const tomorrow = new Date()
+                        tomorrow.setDate(tomorrow.getDate() + 1)
+                        tomorrow.setHours(0, 0, 0, 0)
+                        const next7Days = new Date()
+                        next7Days.setDate(next7Days.getDate() + 7)
+                        next7Days.setHours(23, 59, 59, 999)
+                        return bookingDate >= tomorrow && bookingDate <= next7Days && 
                                ['pending', 'confirmed'].includes(b.status)
                       }).sort((a, b) => {
                         const dateA = new Date(`${a.date} ${a.time}`)
@@ -1150,12 +1149,12 @@ export default function AdminPage() {
                         return dateA.getTime() - dateB.getTime()
                       })
                       
-                      const groupedByDate = weekAppointments.reduce((acc, booking) => {
+                      const groupedByDate = next7DaysAppointments.reduce((acc, booking) => {
                         const date = booking.date
                         if (!acc[date]) acc[date] = []
                         acc[date].push(booking)
                         return acc
-                      }, {} as Record<string, typeof weekAppointments>)
+                      }, {} as Record<string, typeof next7DaysAppointments>)
                       
                       return Object.entries(groupedByDate).map(([date, dayBookings]) => (
                         <div key={date} className="bg-gradient-to-b from-tan-50 to-white rounded-lg p-4 border border-tan-200">
@@ -1165,7 +1164,11 @@ export default function AdminPage() {
                           <div className="space-y-2">
                             {dayBookings.map(booking => (
                               <div key={booking._id} className="text-sm">
-                                <p className="font-medium text-tan-800">{formatTime(booking.time)} - {booking.clientName}</p>
+                                <p className="font-medium text-tan-800">{formatTime(booking.time)}</p>
+                                <p className="text-tan-600">{booking.clientName}</p>
+                                {booking.membershipApplied && (
+                                  <span className="inline-block px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs font-medium mt-1">Member</span>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -1175,35 +1178,47 @@ export default function AdminPage() {
                   </div>
                   {bookings.filter(b => {
                     const bookingDate = new Date(b.date)
-                    const now = new Date()
-                    const startOfWeek = new Date(now)
-                    const endOfWeek = new Date(now)
-                    startOfWeek.setDate(now.getDate() - now.getDay())
-                    endOfWeek.setDate(startOfWeek.getDate() + 6)
-                    endOfWeek.setHours(23, 59, 59, 999)
-                    return bookingDate >= startOfWeek && bookingDate <= endOfWeek && 
+                    const tomorrow = new Date()
+                    tomorrow.setDate(tomorrow.getDate() + 1)
+                    tomorrow.setHours(0, 0, 0, 0)
+                    const next7Days = new Date()
+                    next7Days.setDate(next7Days.getDate() + 7)
+                    next7Days.setHours(23, 59, 59, 999)
+                    return bookingDate >= tomorrow && bookingDate <= next7Days && 
                            ['pending', 'confirmed'].includes(b.status)
                   }).length === 0 && (
                     <div className="text-center py-8 text-tan-600">
-                      <p className="text-lg">No appointments scheduled this week</p>
+                      <p className="text-lg">No appointments scheduled for the next 7 days</p>
                     </div>
                   )}
                 </div>
 
-                {/* This Month's Appointments */}
+                {/* Next 30 Days Appointments */}
                 <div className="bg-white rounded-xl shadow-sm border border-tan-100 p-6">
                   <div className="flex items-center justify-between mb-6">
                     <div>
-                      <h2 className="text-2xl font-serif font-semibold text-tan-900">This Month</h2>
-                      <p className="text-tan-600 mt-1">{new Date().toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</p>
+                      <h2 className="text-2xl font-serif font-semibold text-tan-900">Next 30 Days</h2>
+                      <p className="text-tan-600 mt-1">
+                        {(() => {
+                          const tomorrow = new Date()
+                          tomorrow.setDate(tomorrow.getDate() + 1)
+                          const next30Days = new Date()
+                          next30Days.setDate(next30Days.getDate() + 30)
+                          return `${tomorrow.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${next30Days.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
+                        })()}
+                      </p>
                     </div>
                     <div className="bg-tan-100 px-4 py-2 rounded-lg">
                       <span className="text-2xl font-bold text-tan-700">
                         {bookings.filter(b => {
                           const bookingDate = new Date(b.date)
-                          const now = new Date()
-                          return bookingDate.getMonth() === now.getMonth() && 
-                                 bookingDate.getFullYear() === now.getFullYear() && 
+                          const tomorrow = new Date()
+                          tomorrow.setDate(tomorrow.getDate() + 1)
+                          tomorrow.setHours(0, 0, 0, 0)
+                          const next30Days = new Date()
+                          next30Days.setDate(next30Days.getDate() + 30)
+                          next30Days.setHours(23, 59, 59, 999)
+                          return bookingDate >= tomorrow && bookingDate <= next30Days && 
                                  ['pending', 'confirmed'].includes(b.status)
                         }).length}
                       </span>
@@ -1216,9 +1231,11 @@ export default function AdminPage() {
                       <thead>
                         <tr className="border-b border-tan-200">
                           <th className="text-left py-3 px-2 text-tan-700">Date</th>
+                          <th className="text-left py-3 px-2 text-tan-700">Day</th>
                           <th className="text-left py-3 px-2 text-tan-700">Time</th>
                           <th className="text-left py-3 px-2 text-tan-700">Client</th>
                           <th className="text-left py-3 px-2 text-tan-700">Phone</th>
+                          <th className="text-left py-3 px-2 text-tan-700">Type</th>
                           <th className="text-left py-3 px-2 text-tan-700">Status</th>
                         </tr>
                       </thead>
@@ -1226,9 +1243,13 @@ export default function AdminPage() {
                         {bookings
                           .filter(b => {
                             const bookingDate = new Date(b.date)
-                            const now = new Date()
-                            return bookingDate.getMonth() === now.getMonth() && 
-                                   bookingDate.getFullYear() === now.getFullYear() && 
+                            const tomorrow = new Date()
+                            tomorrow.setDate(tomorrow.getDate() + 1)
+                            tomorrow.setHours(0, 0, 0, 0)
+                            const next30Days = new Date()
+                            next30Days.setDate(next30Days.getDate() + 30)
+                            next30Days.setHours(23, 59, 59, 999)
+                            return bookingDate >= tomorrow && bookingDate <= next30Days && 
                                    ['pending', 'confirmed'].includes(b.status)
                           })
                           .sort((a, b) => {
@@ -1238,10 +1259,18 @@ export default function AdminPage() {
                           })
                           .map(booking => (
                             <tr key={booking._id} className="border-b border-tan-100 hover:bg-tan-50 transition-colors">
-                              <td className="py-3 px-2">{formatDate(booking.date)}</td>
+                              <td className="py-3 px-2">{new Date(booking.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</td>
+                              <td className="py-3 px-2 text-tan-600">{new Date(booking.date).toLocaleDateString('en-US', { weekday: 'short' })}</td>
                               <td className="py-3 px-2 font-medium">{formatTime(booking.time)}</td>
                               <td className="py-3 px-2">{booking.clientName}</td>
                               <td className="py-3 px-2 text-tan-600">{booking.clientPhone}</td>
+                              <td className="py-3 px-2">
+                                {booking.membershipApplied ? (
+                                  <span className="px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">Member</span>
+                                ) : (
+                                  <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-medium">Regular</span>
+                                )}
+                              </td>
                               <td className="py-3 px-2">
                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                                   booking.status === 'confirmed' ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'
@@ -1255,13 +1284,17 @@ export default function AdminPage() {
                     </table>
                     {bookings.filter(b => {
                       const bookingDate = new Date(b.date)
-                      const now = new Date()
-                      return bookingDate.getMonth() === now.getMonth() && 
-                             bookingDate.getFullYear() === now.getFullYear() && 
+                      const tomorrow = new Date()
+                      tomorrow.setDate(tomorrow.getDate() + 1)
+                      tomorrow.setHours(0, 0, 0, 0)
+                      const next30Days = new Date()
+                      next30Days.setDate(next30Days.getDate() + 30)
+                      next30Days.setHours(23, 59, 59, 999)
+                      return bookingDate >= tomorrow && bookingDate <= next30Days && 
                              ['pending', 'confirmed'].includes(b.status)
                     }).length === 0 && (
                       <div className="text-center py-8 text-tan-600">
-                        <p className="text-lg">No appointments scheduled this month</p>
+                        <p className="text-lg">No appointments scheduled for the next 30 days</p>
                       </div>
                     )}
                   </div>
