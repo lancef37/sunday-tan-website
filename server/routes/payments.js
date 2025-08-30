@@ -10,7 +10,8 @@ router.post('/process-deposit', async (req, res) => {
     const { 
       sourceId, 
       amount,
-      promoCode 
+      promoCode,
+      paymentType 
     } = req.body
 
     if (!sourceId) {
@@ -49,23 +50,43 @@ router.post('/process-deposit', async (req, res) => {
       })
     }
 
+    // Check for pay-at-appointment option (development mode fallback)
+    if (sourceId === 'pay-at-appointment') {
+      return res.json({
+        success: true,
+        message: 'Payment will be collected at appointment',
+        paymentId: 'pay-at-appointment-' + Date.now(),
+        amount: finalAmount,
+        promoCodeData: promoCodeData,
+        paymentDeferred: true
+      })
+    }
+
     // Process payment through Square
+    if (paymentType === 'additional_tan') {
+      console.log('\n=== ADDITIONAL TAN $40 PAYMENT REQUEST ===');
+      console.log('Payment Type: Additional Tan for Member');
+      console.log('Amount: $' + finalAmount.toFixed(2));
+      console.log('Source ID:', sourceId.substring(0, 10) + '...');
+      console.log('=== END ADDITIONAL TAN PAYMENT REQUEST ===\n');
+    }
+    
     const paymentRequest = {
       sourceId: sourceId,
       amountMoney: {
         amount: squareService.dollarsToCents(finalAmount),
         currency: 'USD'
       },
-      note: `Sunday Tan Deposit`,
+      note: paymentType === 'additional_tan' 
+        ? `Sunday Tan Additional Tan Payment`
+        : `Sunday Tan Deposit`,
       idempotencyKey: squareService.generateIdempotencyKey(`deposit-${Date.now()}`)
     }
 
-    console.log('Processing payment, Amount:', finalAmount)
 
     const paymentResult = await squareService.createPayment(paymentRequest)
 
     if (paymentResult.success) {
-      console.log('Payment successful:', paymentResult.paymentId)
 
       res.json({
         success: true,
@@ -83,7 +104,6 @@ router.post('/process-deposit', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Payment processing error:', error)
     res.status(500).json({
       error: 'Payment processing failed',
       message: error.message
@@ -140,7 +160,6 @@ router.post('/refund', async (req, res) => {
     }
 
   } catch (error) {
-    console.error('Refund processing error:', error)
     res.status(500).json({
       error: 'Refund processing failed',
       message: error.message
@@ -166,7 +185,6 @@ router.get('/status/:bookingId', async (req, res) => {
     })
 
   } catch (error) {
-    console.error('Error fetching payment status:', error)
     res.status(500).json({ error: 'Failed to fetch payment status' })
   }
 })

@@ -57,4 +57,188 @@
   ::-webkit-scrollbar-thumb:hover {
     background: theme('colors.tan.500');
   }
+  
+  /* Enhanced Calendar Styles */
+  .react-calendar {
+    border: none;
+    font-family: inherit;
+    background: transparent;
+  }
+  
+  .react-calendar__navigation {
+    margin-bottom: 0.5rem;
+    background: transparent;
+  }
+  
+  .react-calendar__navigation button {
+    color: theme('colors.tan.700');
+    font-weight: 500;
+    background: transparent;
+    transition: all 0.2s;
+  }
+  
+  .react-calendar__navigation button:hover:enabled {
+    background-color: theme('colors.tan.100');
+    color: theme('colors.tan.900');
+    border-radius: 0.5rem;
+  }
+  
+  .react-calendar__month-view__weekdays {
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: theme('colors.tan.600');
+    border-bottom: 1px solid theme('colors.tan.200');
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .react-calendar__tile {
+    background: transparent;
+    color: theme('colors.tan.800');
+    padding: 0.75em 0.5em;
+    transition: all 0.2s;
+    border-radius: 0.5rem;
+    position: relative;
+  }
+  
+  .react-calendar__tile:hover:enabled {
+    background: theme('colors.tan.100');
+    color: theme('colors.tan.900');
+    transform: scale(1.05);
+  }
+  
+  .react-calendar__tile--active {
+    background: linear-gradient(135deg, theme('colors.tan.600'), theme('colors.tan.700')) !important;
+    color: white !important;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  
+  .react-calendar__tile--now {
+    background: theme('colors.tan.50');
+    font-weight: 600;
+    color: theme('colors.tan.900');
+  }
+  
+  .react-calendar__tile--now:hover:enabled {
+    background: theme('colors.tan.100');
+  }
+  
+  .react-calendar__tile:disabled {
+    color: theme('colors.gray.400');
+    background: transparent;
+  }
+  
+  /* Mobile-specific Calendar Styles */
+  @media (max-width: 640px) {
+    .mobile-calendar .react-calendar {
+      width: 100%;
+      font-size: 0.875rem;
+    }
+    
+    .mobile-calendar .react-calendar__tile {
+      padding: 0.5em 0.25em;
+      min-height: 44px;
+    }
+    
+    .mobile-calendar .react-calendar__navigation button {
+      min-height: 44px;
+      font-size: 0.875rem;
+    }
+    
+    .mobile-calendar .react-calendar__month-view__weekdays {
+      font-size: 0.7rem;
+    }
+  }
+  
+  /* Prevent zoom on input focus for iOS */
+  @media (max-width: 768px) {
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="password"],
+    input[type="number"],
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+  
+  /* Mobile-friendly touch targets */
+  @media (max-width: 640px) {
+    button, 
+    a, 
+    .clickable {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
+  
+  /* Improved mobile scrolling */
+  @media (max-width: 768px) {
+    * {
+      -webkit-overflow-scrolling: touch;
+    }
+    
+    body {
+      -webkit-tap-highlight-color: transparent;
+    }
+  }
+  
+  /* Loading animations */
+  @keyframes slideUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slideUp 0.5s ease-out forwards;
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+  
+  .animate-fadeIn {
+    animation: fadeIn 0.4s ease-in-out forwards;
+  }
+  
+  .animate-shimmer {
+    animation: shimmer 2s linear infinite;
+  }
+  
+  /* Card hover effects */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:-translate-y-1;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-tan-600 to-tan-800 bg-clip-text text-transparent;
+  }
 }

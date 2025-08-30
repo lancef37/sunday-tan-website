@@ -10,7 +10,7 @@ This project includes specialized subagents for improved development speed. See 
 1. **Booking Specialist** - Handles booking flows, availability, and client management
 2. **Auth Security Expert** - Manages authentication, JWT tokens, and security
 3. **API Backend Specialist** - Designs Express.js routes and database operations
-4. **Integration Specialist** - Handles Square payments and Twilio SMS
+4. **Integration Specialist** - Handles Square payments and TextMagic SMS
 5. **Testing QA Specialist** - Debugging, testing, and quality assurance
 6. **Frontend Specialist** - Next.js/React components and UI development
 
@@ -94,7 +94,7 @@ This project includes specialized subagents for improved development speed. See 
 - **Payment Links**: Generated only when Square is enabled
 
 ### SMS Notifications
-- **Twilio**: Send confirmation and denial messages
+- **TextMagic**: Send confirmation and denial messages
 - **Admin Notifications**: Alert admin phone when new bookings arrive
 - **Error Handling**: Continue operations even if SMS fails
 
@@ -127,10 +127,10 @@ NEXT_PUBLIC_API_URL=http://localhost:5000
 
 ### Optional Services
 ```env
-# Twilio SMS
-TWILIO_ACCOUNT_SID=your-sid
-TWILIO_AUTH_TOKEN=your-token
-TWILIO_PHONE_NUMBER=+1234567890
+# TextMagic SMS
+TEXTMAGIC_USERNAME=your-username
+TEXTMAGIC_API_KEY=your-api-key
+TEXTMAGIC_PHONE_NUMBER=+1234567890
 ADMIN_PHONE=+1234567890
 
 # Square Payments

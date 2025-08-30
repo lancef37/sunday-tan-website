@@ -5,7 +5,6 @@ class SquarePaymentService {
     this.isEnabled = process.env.SQUARE_ENABLED === 'true'
     
     if (!this.isEnabled) {
-      console.log('Square payments disabled')
       return
     }
 
@@ -13,13 +12,10 @@ class SquarePaymentService {
     const requiredVars = ['SQUARE_ACCESS_TOKEN', 'SQUARE_LOCATION_ID', 'SQUARE_ENVIRONMENT']
     const missing = requiredVars.filter(key => !process.env[key])
     
-    console.log('Square environment variables check:')
     requiredVars.forEach(key => {
-      console.log(`${key}: ${process.env[key] ? 'SET' : 'MISSING'}`)
     })
     
     if (missing.length > 0) {
-      console.error('Missing Square environment variables:', missing)
       this.isEnabled = false
       return
     }
@@ -34,23 +30,26 @@ class SquarePaymentService {
       environment: environment
     })
 
-    console.log('Square client created, available APIs:', Object.keys(this.client))
     
     // Correct way to access Square APIs
     this.paymentsApi = this.client.payments
     this.locationsApi = this.client.locations
     this.locationId = process.env.SQUARE_LOCATION_ID
 
-    console.log(`Square payment service initialized for ${process.env.SQUARE_ENVIRONMENT} environment`)
-    console.log('Payments API available:', !!this.paymentsApi)
-    console.log('Location ID:', this.locationId)
   }
 
   async createPayment(paymentRequest) {
-    console.log('createPayment called, enabled:', this.isEnabled)
-    console.log('paymentsApi available:', !!this.paymentsApi)
+    console.log('\n=== SQUARE PAYMENT TRIGGERED ===');
+    console.log('Payment Request:', {
+      amount: paymentRequest.amountMoney?.amount,
+      currency: paymentRequest.amountMoney?.currency,
+      note: paymentRequest.note,
+      idempotencyKey: paymentRequest.idempotencyKey,
+      sourceId: paymentRequest.sourceId?.substring(0, 10) + '...'
+    });
     
     if (!this.isEnabled) {
+      console.log('Square payments not enabled - throwing error');
       throw new Error('Square payments are not enabled')
     }
 
@@ -59,10 +58,13 @@ class SquarePaymentService {
 
       // Check if we're in test mode (invalid credentials)
       if (sourceId === 'cnon:card-nonce-ok' || sourceId.startsWith('cnon:')) {
-        console.log('Mock payment mode - simulating successful payment')
+        const mockPaymentId = `mock_payment_${Date.now()}`;
+        console.log('Test mode detected - returning mock payment');
+        console.log('Mock Payment ID:', mockPaymentId);
+        console.log('Mock Amount:', amountMoney.amount, 'cents ($' + (amountMoney.amount / 100).toFixed(2) + ')');
         return {
           success: true,
-          paymentId: `mock_payment_${Date.now()}`,
+          paymentId: mockPaymentId,
           status: 'COMPLETED',
           amount: amountMoney.amount,
           currency: amountMoney.currency || 'USD',
@@ -83,20 +85,24 @@ class SquarePaymentService {
         autocomplete: true
       }
 
-      console.log('Creating Square payment with request:', {
-        ...requestBody,
-        sourceId: sourceId.substring(0, 10) + '...' // Log partial source ID for security
-      })
-
+      console.log('Sending payment to Square API...');
+      console.log('Request Body:', {
+        locationId: requestBody.locationId,
+        amount: requestBody.amountMoney.amount.toString(),
+        currency: requestBody.amountMoney.currency,
+        note: requestBody.note
+      });
+      
       const response = await this.paymentsApi.create(requestBody)
       
       if (response.result.payment) {
         const payment = response.result.payment
-        console.log('Square payment created successfully:', {
-          id: payment.id,
-          status: payment.status,
-          amount: payment.amountMoney.amount
-        })
+        console.log('✅ PAYMENT SUCCESSFUL!');
+        console.log('Payment ID:', payment.id);
+        console.log('Status:', payment.status);
+        console.log('Amount:', payment.amountMoney.amount, 'cents ($' + (Number(payment.amountMoney.amount) / 100).toFixed(2) + ')');
+        console.log('Receipt URL:', payment.receiptUrl);
+        console.log('=== END SQUARE PAYMENT ===\n');
         
         return {
           success: true,
@@ -108,28 +114,61 @@ class SquarePaymentService {
           receiptUrl: payment.receiptUrl
         }
       } else {
+        console.log('❌ PAYMENT FAILED - No payment object in response');
+        console.log('=== END SQUARE PAYMENT ===\n');
         throw new Error('No payment object in response')
       }
 
     } catch (error) {
-      console.error('Square payment error:', error)
+      console.log('❌ PAYMENT ERROR!');
+      console.log('Error Type:', error.constructor.name);
+      console.log('Error Message:', error.message);
       
       if (error instanceof SquareError) {
         const errorDetails = error.errors || []
         const errorMessages = errorDetails.map(err => err.detail || err.code).join(', ')
+        console.log('Square API Error Details:', errorMessages);
+        console.log('=== END SQUARE PAYMENT ===\n');
         throw new Error(`Square API Error: ${errorMessages}`)
       }
       
+      console.log('=== END SQUARE PAYMENT ===\n');
       throw new Error(`Payment processing failed: ${error.message}`)
     }
   }
 
   async refundPayment(paymentId, amountMoney, reason) {
+    console.log('\n=== SQUARE REFUND TRIGGERED ===');
+    console.log('Refund Request:', {
+      paymentId: paymentId,
+      amount: amountMoney.amount,
+      amountInDollars: '$' + (amountMoney.amount / 100).toFixed(2),
+      currency: amountMoney.currency,
+      reason: reason
+    });
+    
     if (!this.isEnabled) {
+      console.log('Square payments not enabled - throwing error');
       throw new Error('Square payments are not enabled')
     }
 
     try {
+      // Check for test mode payment IDs
+      if (paymentId.startsWith('square_') || paymentId.startsWith('mock_')) {
+        const mockRefundId = `mock_refund_${Date.now()}`;
+        console.log('Test mode detected - returning mock refund');
+        console.log('Mock Refund ID:', mockRefundId);
+        console.log('Mock Refund Amount:', amountMoney.amount, 'cents ($' + (amountMoney.amount / 100).toFixed(2) + ')');
+        console.log('=== END SQUARE REFUND ===\n');
+        return {
+          success: true,
+          refundId: mockRefundId,
+          status: 'COMPLETED',
+          amount: amountMoney.amount,
+          currency: amountMoney.currency || 'USD'
+        }
+      }
+      
       const refundsApi = this.client.refunds
       
       const requestBody = {
@@ -142,15 +181,23 @@ class SquarePaymentService {
         reason: reason || 'Customer refund request'
       }
 
-      const response = await refundsApi.create(requestBody)
+      console.log('Sending refund to Square API...');
+      console.log('Refund Request Body:', {
+        paymentId: requestBody.paymentId,
+        amount: requestBody.amountMoney.amount.toString(),
+        currency: requestBody.amountMoney.currency,
+        reason: requestBody.reason
+      });
+      
+      const response = await refundsApi.refund(requestBody)
       
       if (response.result.refund) {
         const refund = response.result.refund
-        console.log('Square refund created successfully:', {
-          id: refund.id,
-          status: refund.status,
-          amount: refund.amountMoney.amount
-        })
+        console.log('✅ REFUND SUCCESSFUL!');
+        console.log('Refund ID:', refund.id);
+        console.log('Status:', refund.status);
+        console.log('Amount:', refund.amountMoney.amount, 'cents ($' + (Number(refund.amountMoney.amount) / 100).toFixed(2) + ')');
+        console.log('=== END SQUARE REFUND ===\n');
         
         return {
           success: true,
@@ -162,14 +209,19 @@ class SquarePaymentService {
       }
 
     } catch (error) {
-      console.error('Square refund error:', error)
+      console.log('❌ REFUND ERROR!');
+      console.log('Error Type:', error.constructor.name);
+      console.log('Error Message:', error.message);
       
       if (error instanceof SquareError) {
         const errorDetails = error.errors || []
         const errorMessages = errorDetails.map(err => err.detail || err.code).join(', ')
+        console.log('Square Refund API Error Details:', errorMessages);
+        console.log('=== END SQUARE REFUND ===\n');
         throw new Error(`Square Refund API Error: ${errorMessages}`)
       }
       
+      console.log('=== END SQUARE REFUND ===\n');
       throw new Error(`Refund processing failed: ${error.message}`)
     }
   }
@@ -189,13 +241,10 @@ class SquarePaymentService {
     try {
       const response = await this.locationsApi.list()
       if (response.result && response.result.locations) {
-        console.log('Square credentials valid. Available locations:')
         response.result.locations.forEach(location => {
-          console.log(`- ${location.name} (${location.id})`)
         })
       }
     } catch (error) {
-      console.error('Square credentials test failed:', error.message)
     }
   }
 

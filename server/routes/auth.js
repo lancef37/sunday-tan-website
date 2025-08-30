@@ -23,7 +23,6 @@ router.post('/admin/login', async (req, res) => {
 
     res.json({ token, message: 'Login successful' })
   } catch (error) {
-    console.error('Login error:', error)
     res.status(500).json({ error: 'Login failed' })
   }
 })

@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Booking = require('../models/Booking')
 const squareService = require('../services/square')
-const smsService = require('../services/sms')
+const { sendSMS } = require('../services/sms')
 const { v4: uuidv4 } = require('uuid')
 
 // Generate cancellation token for a booking
@@ -14,10 +14,29 @@ async function generateCancellationToken(bookingId) {
 
 // Calculate hours between now and appointment
 function getHoursUntilAppointment(date, time) {
+  // Parse the date string properly - date is in YYYY-MM-DD format
+  // Add timezone to ensure local time interpretation
   const appointmentDateTime = new Date(`${date}T${time}:00`)
   const now = new Date()
+  
+  // Debug logging
+  console.log('\n=== DATE CALCULATION DEBUG ===');
+  console.log('Input date:', date);
+  console.log('Input time:', time);
+  console.log('Appointment DateTime:', appointmentDateTime.toLocaleString());
+  console.log('Current DateTime:', now.toLocaleString());
+  console.log('Appointment timestamp:', appointmentDateTime.getTime());
+  console.log('Current timestamp:', now.getTime());
+  
   const diffMs = appointmentDateTime.getTime() - now.getTime()
-  return diffMs / (1000 * 60 * 60) // Convert to hours
+  const hours = diffMs / (1000 * 60 * 60)
+  
+  console.log('Difference in ms:', diffMs);
+  console.log('Difference in hours:', hours);
+  console.log('Is refundable (>48 hours)?:', hours > 48);
+  console.log('=== END DATE CALCULATION DEBUG ===\n');
+  
+  return hours // Convert to hours
 }
 
 // GET /cancel/:token - Cancellation page
@@ -66,7 +85,6 @@ router.get('/cancel/:token', async (req, res) => {
     })
     
   } catch (error) {
-    console.error('Error fetching cancellation details:', error)
     res.status(500).json({ error: 'Server error' })
   }
 })
@@ -104,8 +122,22 @@ router.post('/cancel/:token', async (req, res) => {
     
     // Process refund if eligible and payment exists
     if (isRefundEligible && hasPayment) {
+      console.log('\n=== CANCELLATION REFUND TRIGGERED ===');
+      console.log('Booking Cancellation Details:', {
+        bookingId: booking._id,
+        clientName: booking.clientName,
+        date: booking.date,
+        time: booking.time,
+        hoursUntilAppointment: Math.round(hoursUntilAppointment),
+        paymentId: booking.paymentId,
+        depositAmount: booking.depositAmount || 10
+      });
+      console.log('Refund Eligible: YES (>48 hours notice)');
+      
       try {
         const depositAmount = booking.depositAmount || 10
+        console.log('Processing deposit refund: $' + depositAmount.toFixed(2));
+        
         refundResult = await squareService.refundPayment(
           booking.paymentId,
           { amount: squareService.dollarsToCents(depositAmount), currency: 'USD' },
@@ -115,16 +147,31 @@ router.post('/cancel/:token', async (req, res) => {
         if (refundResult.success) {
           refundStatus = 'processed'
           refundAmount = depositAmount
+          console.log('✅ CANCELLATION DEPOSIT REFUND SUCCESSFUL!');
+          console.log('Refund Status: processed');
+          console.log('Refund Amount: $' + depositAmount.toFixed(2));
+          console.log('=== END CANCELLATION REFUND ===\n');
         } else {
           refundStatus = 'failed'
+          console.log('❌ CANCELLATION DEPOSIT REFUND FAILED!');
+          console.log('=== END CANCELLATION REFUND ===\n');
         }
       } catch (refundError) {
-        console.error('Refund processing error:', refundError)
         refundStatus = 'failed'
+        console.log('❌ CANCELLATION REFUND ERROR:', refundError.message);
+        console.log('=== END CANCELLATION REFUND ===\n');
       }
     } else if (isRefundEligible && !hasPayment) {
       // Promocode booking - no refund needed
+      console.log('\n=== CANCELLATION REFUND CHECK ===');
+      console.log('Promocode booking - no payment to refund');
+      console.log('=== END CANCELLATION REFUND CHECK ===\n');
       refundStatus = 'not_applicable'
+    } else if (!isRefundEligible) {
+      console.log('\n=== CANCELLATION REFUND CHECK ===');
+      console.log('Not eligible for refund (less than 48 hours notice)');
+      console.log('Hours until appointment:', Math.round(hoursUntilAppointment));
+      console.log('=== END CANCELLATION REFUND CHECK ===\n');
     }
     
     // Update booking status
@@ -151,7 +198,6 @@ router.post('/cancel/:token', async (req, res) => {
         })
       }
     } catch (smsError) {
-      console.error('Admin SMS notification failed:', smsError)
       // Don't fail the cancellation if SMS fails
     }
     
@@ -163,7 +209,6 @@ router.post('/cancel/:token', async (req, res) => {
         isRefundEligible
       })
     } catch (smsError) {
-      console.error('Client SMS confirmation failed:', smsError)
     }
     
     res.json({
@@ -176,8 +221,6 @@ router.post('/cancel/:token', async (req, res) => {
     })
     
   } catch (error) {
-    console.error('Error processing cancellation:', error)
-    console.error('Error stack:', error.stack)
     res.status(500).json({ error: 'Server error during cancellation', details: error.message })
   }
 })
@@ -202,7 +245,7 @@ ${refundText}
 
 Slot now available for rebooking.`
 
-  return await smsService.sendSMS(adminPhone, message)
+  return await sendSMS(adminPhone, message)
 }
 
 // Helper function to send client cancellation confirmation SMS
@@ -230,7 +273,7 @@ Thank you for choosing Sunday Tan. We hope to see you again soon!
 
 - The Sunday Tan Team`
 
-  return await smsService.sendSMS(clientPhone, message)
+  return await sendSMS(clientPhone, message)
 }
 
 module.exports = { router, generateCancellationToken }

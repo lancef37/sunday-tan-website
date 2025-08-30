@@ -28,7 +28,7 @@ const bookingSchema = new mongoose.Schema({
   },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'paid', 'failed'],
+    enum: ['pending', 'paid', 'failed', 'waived'],
     default: 'pending'
   },
   paymentId: {
@@ -46,6 +46,21 @@ const bookingSchema = new mongoose.Schema({
     type: Number,
     default: null // Amount after applying promocode discounts
   },
+  // Allows multiple promocodes to be stacked
+  appliedPromoCodes: [{
+    code: String,
+    type: {
+      type: String,
+      enum: ['regular', 'referral'],
+      required: true
+    },
+    discountAmount: Number,
+    appliedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
+  // Legacy field for backwards compatibility
   promoCode: {
     code: {
       type: String,
@@ -56,9 +71,28 @@ const bookingSchema = new mongoose.Schema({
       default: 0
     }
   },
+  // Track total stacked discounts
+  totalPromoDiscount: {
+    type: Number,
+    default: 0
+  },
+  // Referral tracking
+  referralId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Referral',
+    default: null
+  },
+  additionalDiscount: {
+    type: Number,
+    default: 0 // Additional discount to apply at appointment time when stacking
+  },
+  appointmentRevenue: {
+    type: Number,
+    default: null // Amount collected at appointment time (excluding deposit)
+  },
   actualRevenue: {
     type: Number,
-    default: null // Only set when appointment is marked as completed
+    default: null // Total revenue (deposit + appointment revenue)
   },
   completedAt: {
     type: Date,
@@ -103,11 +137,50 @@ const bookingSchema = new mongoose.Schema({
   refundId: {
     type: String,
     default: null // Square refund ID
+  },
+  // Membership fields
+  membershipApplied: {
+    type: Boolean,
+    default: false
+  },
+  membershipType: {
+    type: String,
+    enum: ['included', 'additional'],
+    default: undefined // undefined allows the field to be optional
+  },
+  membershipChargeAmount: {
+    type: Number,
+    default: null // 0 for included, 40 for additional
+  },
+  membershipUsageId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'MembershipUsage',
+    default: null
+  },
+  membershipPaymentRequired: {
+    type: Boolean,
+    default: false // True for additional tans that need payment
+  },
+  // Track membership status at time of booking creation
+  membershipStatusAtBooking: {
+    type: String,
+    enum: ['member', 'non-member'],
+    default: 'non-member'
+  },
+  // Tip amount (for tracking tips separately from service revenue)
+  tipAmount: {
+    type: Number,
+    default: 0
   }
 }, {
   timestamps: true
 })
 
+// Indexes for performance
 bookingSchema.index({ date: 1, time: 1 }, { unique: true })
+bookingSchema.index({ status: 1, date: -1 }) // For admin queries
+bookingSchema.index({ clientPhone: 1 }) // For client lookups
+bookingSchema.index({ completedAt: -1 }) // For revenue reports
+bookingSchema.index({ userId: 1, status: 1 }) // For user bookings
 
 module.exports = mongoose.model('Booking', bookingSchema)

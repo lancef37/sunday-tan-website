@@ -26,9 +26,14 @@ const promoCodeSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  usageType: {
+    type: String,
+    enum: ['unlimited', 'total_limit', 'once_per_client'],
+    default: 'unlimited'
+  },
   usageLimit: {
     type: Number,
-    default: null // null means unlimited usage
+    default: null // null means unlimited usage (only applies when usageType is 'total_limit')
   },
   usageCount: {
     type: Number,
@@ -68,8 +73,8 @@ promoCodeSchema.methods.isValid = function() {
   // Check if not expired
   if (this.validUntil && now > this.validUntil) return false
   
-  // Check if usage limit exceeded
-  if (this.usageLimit && this.usageCount >= this.usageLimit) return false
+  // Check if usage limit exceeded (only for total_limit type)
+  if (this.usageType === 'total_limit' && this.usageLimit && this.usageCount >= this.usageLimit) return false
   
   // Check if valid from date has passed
   if (this.validFrom && now < this.validFrom) return false

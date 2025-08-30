@@ -38,9 +38,19 @@ const clientSchema = new mongoose.Schema({
   },
   lastVisit: {
     type: Date
+  },
+  smsOptIn: {
+    type: Boolean,
+    default: false
   }
 }, {
   timestamps: true
 })
+
+// Indexes for performance
+clientSchema.index({ phone: 1 }) // Already unique from schema
+clientSchema.index({ email: 1 })
+clientSchema.index({ totalAppointments: -1 }) // For top clients
+clientSchema.index({ lastVisit: -1 })
 
 module.exports = mongoose.model('Client', clientSchema)

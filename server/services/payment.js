@@ -1,10 +1,9 @@
 let Client, Environment
 try {
-  const square = require('squareup')
+  const square = require('square')
   Client = square.Client
   Environment = square.Environment
 } catch (error) {
-  console.log('Square SDK not available - payment simulation mode')
   Client = null
   Environment = null
 }
@@ -23,7 +22,6 @@ const checkoutApi = client?.checkoutApi
 async function createPayment(bookingId, amount, description) {
   try {
     if (!client || !process.env.SQUARE_ACCESS_TOKEN) {
-      console.log('Square not configured - payment simulation mode')
       return null
     }
 
@@ -65,7 +63,6 @@ async function createPayment(bookingId, amount, description) {
     throw new Error('No checkout URL returned from Square')
     
   } catch (error) {
-    console.error('Square payment error:', error)
     throw error
   }
 }
@@ -89,7 +86,6 @@ async function verifyPayment(paymentId) {
     throw new Error('Payment not found')
     
   } catch (error) {
-    console.error('Payment verification error:', error)
     throw error
   }
 }

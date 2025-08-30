@@ -52,17 +52,14 @@ function isDateInFuture(dateString) {
 router.get('/:date', async (req, res) => {
   try {
     const { date } = req.params
-    console.log('Fetching slots for date:', date)
     
     // Check if date is in the future
     if (!isDateInFuture(date)) {
-      console.log('Date is in the past, returning empty slots')
       return res.json([])
     }
     
     // Get availability settings
     const availability = await Availability.getSingleton()
-    console.log('Availability settings retrieved')
     
     // Check for date-specific override first
     const dateOverride = availability.dateOverrides.find(override => override.date === date)
@@ -70,29 +67,44 @@ router.get('/:date', async (req, res) => {
     let allSlots = []
     
     if (dateOverride) {
-      console.log('Using date override for', date, ':', dateOverride)
       
       if (dateOverride.type === 'closed') {
-        console.log('Date is closed by override, returning empty slots')
-        return res.json([])
-      }
-      
-      // Use override time blocks
-      if (dateOverride.timeBlocks && dateOverride.timeBlocks.length > 0) {
-        allSlots = generateTimeSlotsFromBlocks(dateOverride.timeBlocks, availability.slotDuration)
+        // For closed overrides, check if specific time blocks are defined
+        if (dateOverride.timeBlocks && dateOverride.timeBlocks.length > 0) {
+          // Get the regular schedule for this day
+          const dayOfWeek = getDayOfWeek(date)
+          const daySchedule = availability.weeklySchedule[dayOfWeek]
+          
+          if (daySchedule.enabled && daySchedule.timeBlocks && daySchedule.timeBlocks.length > 0) {
+            // Start with regular schedule
+            allSlots = generateTimeSlotsFromBlocks(daySchedule.timeBlocks, availability.slotDuration)
+            
+            // Remove the blocked time periods
+            const blockedSlots = generateTimeSlotsFromBlocks(dateOverride.timeBlocks, availability.slotDuration)
+            allSlots = allSlots.filter(slot => !blockedSlots.includes(slot))
+            
+          } else {
+            return res.json([])
+          }
+        } else {
+          // No specific time blocks means entire day is closed
+          return res.json([])
+        }
       } else {
-        console.log('Open override but no time blocks configured, returning empty slots')
-        return res.json([])
+        // Open override - use override time blocks
+        if (dateOverride.timeBlocks && dateOverride.timeBlocks.length > 0) {
+          allSlots = generateTimeSlotsFromBlocks(dateOverride.timeBlocks, availability.slotDuration)
+        } else {
+          return res.json([])
+        }
       }
     } else {
       // Use weekly schedule
       const dayOfWeek = getDayOfWeek(date)
       const daySchedule = availability.weeklySchedule[dayOfWeek]
-      console.log('Using weekly schedule for', dayOfWeek, ':', daySchedule)
       
       // If day is not enabled, return empty slots
       if (!daySchedule.enabled) {
-        console.log('Day is not available, returning empty slots')
         return res.json([])
       }
       
@@ -100,12 +112,10 @@ router.get('/:date', async (req, res) => {
       if (daySchedule.timeBlocks && daySchedule.timeBlocks.length > 0) {
         allSlots = generateTimeSlotsFromBlocks(daySchedule.timeBlocks, availability.slotDuration)
       } else {
-        console.log('Day enabled but no time blocks configured, returning empty slots')
         return res.json([])
       }
     }
     
-    console.log('Generated time slots:', allSlots)
     
     // Get booked, blocked, and temporarily reserved slots
     const [bookedSlots, blockedSlots, reservedSlots] = await Promise.all([
@@ -123,17 +133,14 @@ router.get('/:date', async (req, res) => {
       ...reservedSlots.map(slot => slot.time)
     ])
     
-    console.log('Unavailable times:', Array.from(unavailableTimes))
 
     const availableSlots = allSlots.map(time => ({
       time,
       available: !unavailableTimes.has(time)
     }))
     
-    console.log('Final available slots:', availableSlots)
     res.json(availableSlots)
   } catch (error) {
-    console.error('Error fetching slots:', error)
     res.status(500).json({ error: 'Failed to fetch available slots' })
   }
 })

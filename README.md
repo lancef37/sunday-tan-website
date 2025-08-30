@@ -2,6 +2,15 @@
 
 A complete booking system for a mobile spray tan business with client management, payment processing, and SMS notifications.
 
+## 🌐 Live Demo
+- **Frontend**: [https://sunday-tan-website.vercel.app](https://sunday-tan-website.vercel.app)
+- **API**: [https://sunday-tan-website-production.up.railway.app](https://sunday-tan-website-production.up.railway.app)
+
+## 📚 Documentation
+- [Setup Guide](./SETUP-GUIDE.md) - Detailed setup instructions
+- [Deployment Guide](./DEPLOYMENT.md) - Deploy to production
+- [Development Rules](./CLAUDE.md) - Development guidelines
+
 ## 🚀 Quick Start Guide (For Beginners)
 
 ### Prerequisites
@@ -25,8 +34,9 @@ npm run install:all
 ```
 
 ### Step 3: Configure Environment Variables
-1. Copy the `.env.example` file and rename it to `.env`
-2. Edit the `.env` file with your actual values:
+1. For local development: Copy `.env.local.example` to `.env.local`
+2. For production: See [Deployment Guide](./DEPLOYMENT.md)
+3. Edit the `.env.local` file with your actual values:
 
 ```env
 # Basic Setup (Required)
@@ -40,10 +50,10 @@ ADMIN_PHONE=+1234567890
 # Square Payment (Optional - can enable later)
 SQUARE_ENABLED=false
 
-# Twilio SMS (Optional - can enable later)  
-TWILIO_ACCOUNT_SID=your-account-sid
-TWILIO_AUTH_TOKEN=your-auth-token
-TWILIO_PHONE_NUMBER=+1234567890
+# TextMagic SMS (Optional - can enable later)  
+TEXTMAGIC_USERNAME=your-username
+TEXTMAGIC_API_KEY=your-api-key
+TEXTMAGIC_PHONE_NUMBER=+1234567890
 ```
 
 ### Step 4: Generate Admin Password
@@ -102,14 +112,14 @@ This will start both the frontend (http://localhost:3000) and backend (http://lo
    SQUARE_ENVIRONMENT=sandbox  # Use 'production' when ready to go live
    ```
 
-### Twilio SMS Setup
-1. Create a Twilio account at [twilio.com](https://twilio.com)
-2. Get your Account SID, Auth Token, and phone number
+### TextMagic SMS Setup
+1. Create a TextMagic account at [textmagic.com](https://textmagic.com)
+2. Get your username and API key from the API settings page
 3. Update your `.env` file:
    ```env
-   TWILIO_ACCOUNT_SID=your-account-sid
-   TWILIO_AUTH_TOKEN=your-auth-token
-   TWILIO_PHONE_NUMBER=+1234567890
+   TEXTMAGIC_USERNAME=your-username
+   TEXTMAGIC_API_KEY=your-api-key
+   TEXTMAGIC_PHONE_NUMBER=+1234567890
    ```
 
 ## 📁 Project Structure

@@ -15,6 +15,8 @@ const playfair = Playfair_Display({
 export const metadata: Metadata = {
   title: 'Sunday Tan - Professional Mobile Spray Tan',
   description: 'Book your professional mobile spray tan appointment with Sunday Tan',
+  viewport: 'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes',
+  themeColor: '#d4a574',
 }
 
 export default function RootLayout({

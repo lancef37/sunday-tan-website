@@ -1,55 +1,34 @@
-const twilio = require('twilio')
+const TMClient = require('textmagic-rest-client')
 
-const accountSid = process.env.TWILIO_ACCOUNT_SID
-const authToken = process.env.TWILIO_AUTH_TOKEN
-const fromNumber = process.env.TWILIO_PHONE_NUMBER
+const username = process.env.TEXTMAGIC_USERNAME
+const apiKey = process.env.TEXTMAGIC_API_KEY
+const fromNumber = process.env.TEXTMAGIC_PHONE_NUMBER
 
 let client = null
 
-function validateTwilioCredentials() {
-  console.log('Validating Twilio credentials...')
+function validateTextMagicCredentials() {
   
-  if (!accountSid) {
-    console.log('TWILIO_ACCOUNT_SID not set')
+  if (!username) {
     return false
   }
   
-  if (!authToken) {
-    console.log('TWILIO_AUTH_TOKEN not set')
+  if (!apiKey) {
     return false
   }
   
   if (!fromNumber) {
-    console.log('TWILIO_PHONE_NUMBER not set')
-    return false
   }
   
-  if (!accountSid.startsWith('AC')) {
-    console.log('Invalid TWILIO_ACCOUNT_SID format - should start with AC')
-    return false
-  }
-  
-  if (authToken.length < 32) {
-    console.log('Invalid TWILIO_AUTH_TOKEN - too short')
-    return false
-  }
-  
-  console.log('Twilio credentials format validation passed')
   return true
 }
 
-if (validateTwilioCredentials()) {
+if (validateTextMagicCredentials()) {
   try {
-    console.log('Initializing Twilio client...')
-    client = twilio(accountSid, authToken)
-    console.log('Twilio client initialized successfully')
+    client = new TMClient(username, apiKey)
   } catch (error) {
-    console.error('Twilio initialization failed:', error.message)
-    console.log('SMS simulation mode enabled')
     client = null
   }
 } else {
-  console.log('Twilio credentials not properly configured - SMS simulation mode enabled')
 }
 
 function validatePhoneNumber(phone) {
@@ -59,66 +38,82 @@ function validatePhoneNumber(phone) {
   return phoneRegex.test(cleaned)
 }
 
-async function sendSMS(to, message) {
+function formatPhoneNumber(phone) {
+  // Clean and format phone number for TextMagic
+  let cleaned = phone.replace(/[\s\-\(\)\.]/g, '')
+  
+  // Add +1 if not present (for US numbers)
+  if (!cleaned.startsWith('+')) {
+    if (cleaned.startsWith('1') && cleaned.length === 11) {
+      cleaned = '+' + cleaned
+    } else if (cleaned.length === 10) {
+      cleaned = '+1' + cleaned
+    }
+  }
+  
+  return cleaned
+}
+
+async function sendSMS(to, message, checkOptIn = false, isOptedIn = true) {
   try {
+    // Check opt-in status if required
+    if (checkOptIn && !isOptedIn) {
+      return { success: true, skipped: true, reason: 'User opted out of SMS' }
+    }
+
     // Validate phone number format
     if (!validatePhoneNumber(to)) {
-      console.error('Invalid phone number format:', to)
       throw new Error(`Invalid phone number format: ${to}`)
     }
 
     // Validate message content
     if (!message || message.length === 0) {
-      console.error('Empty message provided')
       throw new Error('Empty message provided')
     }
 
     if (message.length > 1600) {
-      console.warn('Message is very long, may cause issues:', message.length)
     }
 
+    // Format phone number for TextMagic
+    const formattedPhone = formatPhoneNumber(to)
+
     // Debug mode - log without sending
-    console.log(`SMS_DEBUG environment variable: ${process.env.SMS_DEBUG}`)
     if (process.env.SMS_DEBUG === 'true') {
-      console.log('SMS DEBUG MODE - Not sending actual SMS')
-      console.log(`DEBUG: Would send SMS to ${to}`)
-      console.log(`DEBUG: Message: ${message}`)
-      console.log(`DEBUG: From number: ${fromNumber}`)
-      console.log(`DEBUG: Client configured: ${!!client}`)
       return { success: true, debug: true, simulation: true }
     }
 
     if (!client) {
-      console.log('Twilio not configured - SMS simulation mode')
-      console.log(`Would send SMS to ${to}: ${message}`)
       return { success: true, simulation: true }
     }
 
-    console.log(`Attempting to send SMS to ${to}`)
-    console.log(`Message length: ${message.length} characters`)
     
-    const response = await client.messages.create({
-      body: message,
-      from: fromNumber,
-      to: to
+    // TextMagic uses a callback-based API, so we wrap it in a Promise
+    return new Promise((resolve, reject) => {
+      const params = {
+        text: message,
+        phones: formattedPhone
+      }
+      
+      // Add from number if configured
+      if (fromNumber) {
+        params.from = fromNumber
+      }
+      
+      client.Messages.send(params, function(err, res) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve({ success: true, id: res.id, messageCount: res.messageCount })
+        }
+      })
     })
-
-    console.log('SMS sent successfully:', response.sid)
-    return { success: true, sid: response.sid }
     
   } catch (error) {
-    console.error('SMS sending error:', error)
-    console.error('Error details:', {
-      name: error.name,
-      message: error.message,
-      code: error.code,
-      status: error.status
-    })
     throw error
   }
 }
 
-async function sendBookingNotification(adminPhone, booking) {
+async function sendBookingNotification(adminPhone, booking, userOptIn = true) {
   const message = `✨ Sunday Tan - New Booking Request ✨
 
 📅 ${booking.date} at ${booking.time}
@@ -134,7 +129,7 @@ Time to make someone glow! ☀️`
   return await sendSMS(adminPhone, message)
 }
 
-async function sendPendingBookingSMS(clientPhone, booking) {
+async function sendPendingBookingSMS(clientPhone, booking, userOptIn = true) {
   const message = `✨ Sunday Tan - Booking Request Received ✨
 
 Thank you for booking with us!
@@ -147,10 +142,10 @@ Your appointment is being reviewed and you'll receive confirmation shortly.
 
 - The Sunday Tan Team`
 
-  return await sendSMS(clientPhone, message)
+  return await sendSMS(clientPhone, message, true, userOptIn)
 }
 
-async function sendConfirmationSMS(clientPhone, booking) {
+async function sendConfirmationSMS(clientPhone, booking, userOptIn = true) {
   const baseUrl = process.env.BASE_URL || 'http://localhost:3000'
   const cancellationUrl = booking.cancellationToken 
     ? `${baseUrl}/api/cancel/${booking.cancellationToken}`
@@ -172,10 +167,10 @@ ${cancellationText}
 
 - The Sunday Tan Team`
 
-  return await sendSMS(clientPhone, message)
+  return await sendSMS(clientPhone, message, true, userOptIn)
 }
 
-async function sendDenialSMS(clientPhone, booking) {
+async function sendDenialSMS(clientPhone, booking, userOptIn = true) {
   const message = `✨ Sunday Tan - Booking Update ✨
 
 We're sorry, but the requested time slot is no longer available:
@@ -187,10 +182,10 @@ Please visit our website to book a different time that works for you. We have ma
 
 - The Sunday Tan Team`
 
-  return await sendSMS(clientPhone, message)
+  return await sendSMS(clientPhone, message, true, userOptIn)
 }
 
-async function sendReminderSMS(clientPhone, booking) {
+async function sendReminderSMS(clientPhone, booking, userOptIn = true) {
   const message = `🌟 Tomorrow's the day for your glow-up! 🌟
 
 Sunday Tan Reminder:
@@ -205,7 +200,22 @@ Ready to glow? We are! ✨
 
 - Sunday Tan`
 
-  return await sendSMS(clientPhone, message)
+  return await sendSMS(clientPhone, message, true, userOptIn)
+}
+
+// Send referral reward notification
+async function sendReferralRewardSMS(phone, referral, userOptIn = true) {
+  let message = ''
+  
+  if (referral.referrerRewardType === 'membership_discount') {
+    message = `Great news! Your friend ${referral.friendName} completed their appointment. You've earned $10 off your next membership bill. Your total pending discount is now applied automatically at renewal! 🎉`
+  } else if (referral.referrerRewardCode) {
+    message = `Great news! Your friend ${referral.friendName} completed their appointment. Here's your reward code ${referral.referrerRewardCode} for $10 off your next tan. Thank you for spreading the glow! 🌟`
+  } else {
+    message = `Great news! Your friend ${referral.friendName} completed their appointment. Your referral reward will be processed shortly. Thank you for spreading the glow! ✨`
+  }
+  
+  return await sendSMS(phone, message)
 }
 
 module.exports = {
@@ -214,5 +224,6 @@ module.exports = {
   sendPendingBookingSMS,
   sendConfirmationSMS,
   sendDenialSMS,
-  sendReminderSMS
+  sendReminderSMS,
+  sendReferralRewardSMS
 }

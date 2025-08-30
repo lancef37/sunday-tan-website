@@ -25,7 +25,6 @@ const createTransporter = () => {
 const sendEmail = async (to, subject, html) => {
   try {
     if (!process.env.EMAIL_USER || !process.env.EMAIL_PASSWORD) {
-      console.log('Email service not configured. Skipping email:', { to, subject })
       return { messageId: 'email-not-configured' }
     }
 
@@ -39,10 +38,8 @@ const sendEmail = async (to, subject, html) => {
     }
 
     const info = await transporter.sendMail(mailOptions)
-    console.log('Email sent:', info.messageId)
     return info
   } catch (error) {
-    console.error('Email send error:', error)
     throw error
   }
 }

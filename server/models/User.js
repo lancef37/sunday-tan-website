@@ -38,7 +38,16 @@ const userSchema = new mongoose.Schema({
   bookings: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Booking'
-  }]
+  }],
+  membershipId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Membership',
+    default: null
+  },
+  smsOptIn: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true
 })

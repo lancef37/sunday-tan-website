@@ -1,0 +1,181 @@
+│ Here is Claude's plan:                                          │
+│ ╭─────────────────────────────────────────────────────────────╮ │
+│ │ Membership Feature Implementation Plan (Revised)            │ │
+│ │                                                             │ │
+│ │ Overview                                                    │ │
+│ │                                                             │ │
+│ │ Add a membership system where users pay $100/month for 2    │ │
+│ │ included tans and discounted additional tans at $40 each,   │ │
+│ │ plus 10% off products. Tans only count against membership   │ │
+│ │ when marked "completed" by admin.                           │ │
+│ │                                                             │ │
+│ │ 1. Database Models & Schema Updates                         │ │
+│ │                                                             │ │
+│ │ A. Create Membership Model (server/models/Membership.js)    │ │
+│ │                                                             │ │
+│ │ - Fields: userId, status (active/cancelled/expired),        │ │
+│ │ startDate, nextBillingDate, stripeSubscriptionId,           │ │
+│ │ tansUsedThisMonth, monthlyTansIncluded (2),                 │ │
+│ │ additionalTanPrice ($40), billingCycleStart,                │ │
+│ │ billingCycleEnd                                             │ │
+│ │                                                             │ │
+│ │ B. Create MembershipUsage Model                             │ │
+│ │ (server/models/MembershipUsage.js)                          │ │
+│ │                                                             │ │
+│ │ - Track tan usage: membershipId, bookingId, usageDate, type │ │
+│ │  (included/additional), amount, status (used/refunded)      │ │
+│ │ - Important: Only create usage record when booking status → │ │
+│ │  "completed"                                                │ │
+│ │                                                             │ │
+│ │ C. Update User Model                                        │ │
+│ │                                                             │ │
+│ │ - Add field: membershipId (reference to Membership)         │ │
+│ │                                                             │ │
+│ │ D. Update Booking Model                                     │ │
+│ │                                                             │ │
+│ │ - Add fields:                                               │ │
+│ │   - membershipApplied (boolean)                             │ │
+│ │   - membershipType (null/'included'/'additional')           │ │
+│ │   - membershipChargeAmount (0 for included, 40 for          │ │
+│ │ additional)                                                 │ │
+│ │   - membershipUsageId (reference to MembershipUsage record) │ │
+│ │                                                             │ │
+│ │ 2. Backend API Routes                                       │ │
+│ │                                                             │ │
+│ │ A. Membership Management (server/routes/membership.js)      │ │
+│ │                                                             │ │
+│ │ - POST /api/membership/subscribe - Create Square            │ │
+│ │ subscription                                                │ │
+│ │ - GET /api/membership/status - Get current membership       │ │
+│ │ details with remaining tans                                 │ │
+│ │ - POST /api/membership/cancel - Cancel subscription         │ │
+│ │ - GET /api/membership/usage - Get usage for current billing │ │
+│ │  cycle                                                      │ │
+│ │                                                             │ │
+│ │ B. Update Admin Routes (server/routes/admin.js)             │ │
+│ │                                                             │ │
+│ │ - Key Change: Modify booking status update endpoint:        │ │
+│ │   - When status → "completed": Create MembershipUsage       │ │
+│ │ record, increment tansUsedThisMonth                         │ │
+│ │   - When status changes FROM "completed" → anything else:   │ │
+│ │ Mark MembershipUsage as refunded, decrement                 │ │
+│ │ tansUsedThisMonth                                           │ │
+│ │   - Track state transitions to handle refunds properly      │ │
+│ │                                                             │ │
+│ │ C. Update Booking Routes                                    │ │
+│ │                                                             │ │
+│ │ - At booking creation: Check membership, calculate price    │ │
+│ │ (but DON'T count tan yet)                                   │ │
+│ │ - Show member pricing but wait for admin completion         │ │
+│ │                                                             │ │
+│ │ 3. Square Payment Integration                               │ │
+│ │                                                             │ │
+│ │ A. Subscription Setup                                       │ │
+│ │ (server/services/squareSubscription.js)                     │ │
+│ │                                                             │ │
+│ │ - Create subscription plan in Square ($100/month)           │ │
+│ │ - Handle recurring billing webhooks                         │ │
+│ │ - Reset tansUsedThisMonth on billing cycle                  │ │
+│ │                                                             │ │
+│ │ 4. Frontend Components                                      │ │
+│ │                                                             │ │
+│ │ A. Account Page Updates (client/app/account/page.tsx)       │ │
+│ │                                                             │ │
+│ │ - Add "Become a Member" button for non-members              │ │
+│ │ - Display membership status card:                           │ │
+│ │   - "Completed Tans: 1 of 2 used this month" (only count    │ │
+│ │ completed)                                                  │ │
+│ │   - Pending tans that will count if completed               │ │
+│ │   - Next billing date                                       │ │
+│ │   - Cancel membership option                                │ │
+│ │                                                             │ │
+│ │ B. Membership Signup Page (client/app/membership/page.tsx)  │ │
+│ │                                                             │ │
+│ │ - Benefits overview                                         │ │
+│ │ - Square payment form for subscription                      │ │
+│ │ - Clear terms: "Tans count when service is completed"       │ │
+│ │                                                             │ │
+│ │ C. Booking Page Updates (client/app/book/page.tsx)          │ │
+│ │                                                             │ │
+│ │ - Show membership status box                                │ │
+│ │ - Display: "You have X tans remaining this month (after     │ │
+│ │ pending appointments are completed)"                        │ │
+│ │ - Calculate pricing:                                        │ │
+│ │   - If tansUsedThisMonth < 2: Show "$0 (Included with       │ │
+│ │ membership)"                                                │ │
+│ │   - If tansUsedThisMonth >= 2: Show "$40 (Member rate)"     │ │
+│ │                                                             │ │
+│ │ D. Admin Dashboard Updates (client/app/admin/page.tsx)      │ │
+│ │                                                             │ │
+│ │ - Show member indicator on bookings                         │ │
+│ │ - Display: "Will use membership tan when completed" or      │ │
+│ │ "Additional tan ($40)"                                      │ │
+│ │ - Status change confirmation: "Changing from completed will │ │
+│ │  refund the membership tan usage"                           │ │
+│ │                                                             │ │
+│ │ 5. Business Logic Implementation                            │ │
+│ │                                                             │ │
+│ │ A. Tan Counting Logic                                       │ │
+│ │                                                             │ │
+│ │ // Only count when admin marks as completed                 │ │
+│ │ onBookingStatusChange(booking, oldStatus, newStatus) {      │ │
+│ │   if (newStatus === 'completed' && oldStatus !==            │ │
+│ │ 'completed') {                                              │ │
+│ │     // Count tan against membership                         │ │
+│ │     createMembershipUsage(booking)                          │ │
+│ │     incrementTansUsed()                                     │ │
+│ │   } else if (oldStatus === 'completed' && newStatus !==     │ │
+│ │ 'completed') {                                              │ │
+│ │     // Refund the tan                                       │ │
+│ │     refundMembershipUsage(booking)                          │ │
+│ │     decrementTansUsed()                                     │ │
+│ │   }                                                         │ │
+│ │ }                                                           │ │
+│ │                                                             │ │
+│ │ B. Pricing Calculation                                      │ │
+│ │                                                             │ │
+│ │ - At booking time: Calculate based on current               │ │
+│ │ tansUsedThisMonth + pending completed bookings              │ │
+│ │ - Member sees potential charge                              │ │
+│ │ - Actual membership usage only recorded on completion       │ │
+│ │                                                             │ │
+│ │ 6. Admin Features                                           │ │
+│ │                                                             │ │
+│ │ A. Admin Dashboard Enhancements                             │ │
+│ │                                                             │ │
+│ │ - Membership overview section                               │ │
+│ │ - Usage history with status changes                         │ │
+│ │ - Ability to manually adjust tan count if needed            │ │
+│ │ - Clear indication when changing status will affect         │ │
+│ │ membership usage                                            │ │
+│ │                                                             │ │
+│ │ 7. Edge Cases & Validation                                  │ │
+│ │                                                             │ │
+│ │ - Handle billing cycle reset (reset tansUsedThisMonth to 0) │ │
+│ │ - Prevent negative tan counts                               │ │
+│ │ - Handle membership cancellation mid-cycle                  │ │
+│ │ - Track refunded tans in usage history                      │ │
+│ │ - Show audit trail of tan usage/refunds                     │ │
+│ │                                                             │ │
+│ │ Implementation Order:                                       │ │
+│ │                                                             │ │
+│ │ 1. Create database models with usage tracking               │ │
+│ │ 2. Set up Square subscription service                       │ │
+│ │ 3. Build membership API routes                              │ │
+│ │ 4. Critical: Update admin booking status endpoint with tan  │ │
+│ │ counting logic                                              │ │
+│ │ 5. Create membership signup page                            │ │
+│ │ 6. Update account page with accurate tan counting           │ │
+│ │ 7. Modify booking page to show membership pricing           │ │
+│ │ 8. Add membership indicators to admin dashboard             │ │
+│ │ 9. Test status change scenarios thoroughly                  │ │
+│ │                                                             │ │
+│ │ Key Difference from Original Plan:                          │ │
+│ │                                                             │ │
+│ │ - Tans are ONLY counted when booking.status = "completed"   │ │
+│ │ - Status changes are tracked and tans are refunded if       │ │
+│ │ status changes from completed                               │ │
+│ │ - Members see clear messaging about when tans count         │ │
+│ │ - Admin sees warnings about membership impact when changing │ │
+│ │  statuses                                                   │ │
+│ ╰─────────────────────────────────────────────────────────────╯ 

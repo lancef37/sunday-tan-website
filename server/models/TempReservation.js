@@ -29,7 +29,19 @@ const tempReservationSchema = new mongoose.Schema({
       discountAmount: Number
     },
     finalAmount: Number,
-    depositAmount: Number
+    depositAmount: Number,
+    membershipPricing: {
+      hasMembership: Boolean,
+      tansUsedThisMonth: Number,
+      pendingTans: Number,
+      totalTansToBeUsed: Number,
+      tansIncluded: Number,
+      tansRemaining: Number,
+      tanPrice: Number,
+      membershipType: String,
+      depositRequired: Boolean,
+      paymentRequired: Boolean
+    }
   },
   expiresAt: {
     type: Date,
