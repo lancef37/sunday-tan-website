@@ -198,6 +198,13 @@ export default function BookingPage() {
     return `${year}-${month}-${day}`
   }
 
+  // Calculate max booking date (2 months from today)
+  const getMaxBookingDate = (): Date => {
+    const maxDate = new Date()
+    maxDate.setMonth(maxDate.getMonth() + 2)
+    return maxDate
+  }
+
   const fetchAvailableSlots = async (date: Date) => {
     try {
       const dateStr = formatDateForAPI(date)
@@ -613,9 +620,16 @@ export default function BookingPage() {
                     onChange={handleDateChange}
                     value={selectedDate}
                     minDate={new Date()}
+                    maxDate={getMaxBookingDate()}
                     className="w-full mobile-calendar border-0"
                   />
-                  <div className="mt-3 pt-3 border-t border-tan-100">
+                  <div className="mt-3 pt-3 border-t border-tan-100 space-y-2">
+                    <p className="text-xs sm:text-sm text-tan-600 text-center px-2 flex items-center justify-center gap-1">
+                      <svg className="w-4 h-4 text-tan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      <span>Book up to 2 months in advance</span>
+                    </p>
                     <p className="text-xs sm:text-sm text-tan-600 text-center px-2 flex items-center justify-center gap-1">
                       <svg className="w-4 h-4 text-tan-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
