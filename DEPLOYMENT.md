@@ -67,7 +67,7 @@ node -e "console.log(require('bcryptjs').hashSync('your-password', 10))"
 1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 2. Add database user with read/write permissions
 3. Whitelist Railway IPs (or allow all IPs for simplicity)
-4. Get connection string: `mongodb+srv://username:password@cluster.mongodb.net/sunday-tan`
+4. Get connection string from Atlas dashboard (format: `mongodb+srv://...`)
 
 ### Option B: Railway MongoDB
 
