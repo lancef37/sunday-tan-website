@@ -264,7 +264,7 @@ export default function BookingPage() {
       const response = await axios.post(`${API_URL}/api/promocodes/validate`, {
         code: code.trim(),
         amount: depositAmount,
-        clientPhone: formData.phoneNumber
+        clientPhone: bookingData.clientPhone
       })
       
       setPromoValidation({
@@ -446,7 +446,7 @@ export default function BookingPage() {
             try {
               await axios.post(`${API_URL}/api/promocodes/apply`, {
                 code: promoValidation.code,
-                clientPhone: formData.phoneNumber,
+                clientPhone: bookingData.clientPhone,
                 bookingId: completeResponse.data._id,
                 discountAmount: promoValidation.discountAmount
               })

@@ -1869,7 +1869,7 @@ export default function AdminPage() {
                                     appointment.bookingId._id,
                                     selectedClient.name,
                                     formatDate(appointment.date),
-                                    appointment.bookingId.time || 'N/A'
+                                    (appointment.bookingId as any)?.time || 'N/A'
                                   )
                                 }}
                                 className="ml-2 px-2 py-1 text-red-600 hover:bg-red-50 rounded text-sm transition-colors"
