@@ -33,22 +33,22 @@ export default function MobileNav() {
       {/* Hamburger Button - Only visible on mobile */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden fixed top-4 right-4 z-50 p-2 rounded-lg bg-tan-100 border-2 border-tan-400 shadow-lg"
+        className="md:hidden fixed top-4 right-4 z-50 p-3 rounded-lg bg-white border-2 border-gray-800 shadow-xl"
         aria-label="Toggle menu"
       >
         <div className="w-6 h-6 relative flex flex-col justify-center">
           <span 
-            className={`absolute h-0.5 w-6 bg-tan-800 transform transition-all duration-300 ${
+            className={`absolute h-0.5 w-6 bg-gray-800 transform transition-all duration-300 ${
               isOpen ? 'rotate-45' : '-translate-y-2'
             }`}
           />
           <span 
-            className={`absolute h-0.5 w-6 bg-tan-800 transition-all duration-300 ${
+            className={`absolute h-0.5 w-6 bg-gray-800 transition-all duration-300 ${
               isOpen ? 'opacity-0' : ''
             }`}
           />
           <span 
-            className={`absolute h-0.5 w-6 bg-tan-800 transform transition-all duration-300 ${
+            className={`absolute h-0.5 w-6 bg-gray-800 transform transition-all duration-300 ${
               isOpen ? '-rotate-45' : 'translate-y-2'
             }`}
           />
