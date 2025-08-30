@@ -37,13 +37,17 @@ function generateTimeSlotsFromBlocks(timeBlocks, slotDuration) {
 
 function getDayOfWeek(dateString) {
   const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
-  const date = new Date(dateString)
+  // Parse date string as local date, not UTC
+  const [year, month, day] = dateString.split('-').map(Number)
+  const date = new Date(year, month - 1, day)
   return dayNames[date.getDay()]
 }
 
 function isDateInFuture(dateString) {
   const today = new Date()
-  const targetDate = new Date(dateString)
+  // Parse date string as local date, not UTC
+  const [year, month, day] = dateString.split('-').map(Number)
+  const targetDate = new Date(year, month - 1, day)
   today.setHours(0, 0, 0, 0)
   targetDate.setHours(0, 0, 0, 0)
   return targetDate >= today
