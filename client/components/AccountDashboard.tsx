@@ -13,9 +13,10 @@ interface DashboardProps {
   bookings: any[]
   membershipStatus: any
   onReferFriend: () => void
+  onViewAppointments?: () => void
 }
 
-export default function AccountDashboard({ user, bookings, membershipStatus, onReferFriend }: DashboardProps) {
+export default function AccountDashboard({ user, bookings, membershipStatus, onReferFriend, onViewAppointments }: DashboardProps) {
   // Calculate statistics
   const totalAppointments = bookings.filter(b => b.status === 'completed').length
   const upcomingAppointments = bookings.filter(b => ['pending', 'confirmed'].includes(b.status)).length
@@ -61,6 +62,7 @@ export default function AccountDashboard({ user, bookings, membershipStatus, onR
           value={upcomingAppointments}
           icon={<FiTrendingUp className="w-6 h-6 text-tan-600" />}
           description={`Scheduled appointment${upcomingAppointments !== 1 ? 's' : ''}`}
+          onClick={onViewAppointments}
         />
         
         <StatsCard
@@ -68,6 +70,7 @@ export default function AccountDashboard({ user, bookings, membershipStatus, onR
           value={totalAppointments}
           icon={<FiCalendar className="w-6 h-6 text-tan-600" />}
           description={`Completed session${totalAppointments !== 1 ? 's' : ''}`}
+          onClick={onViewAppointments}
         />
         
         {membershipStatus?.hasMembership && (

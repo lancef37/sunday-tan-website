@@ -265,6 +265,17 @@ export default function AccountPage() {
     router.push('/')
   }
 
+  const handleViewAppointments = () => {
+    setActiveTab('appointments')
+    // Scroll to the appointments tab after a short delay to allow the tab to render
+    setTimeout(() => {
+      const tabContent = document.getElementById('tab-content')
+      if (tabContent) {
+        tabContent.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }, 100)
+  }
+
   const formatDate = (date: string) => {
     // Parse date string as local date, not UTC
     const [year, month, day] = date.split('-').map(Number)
@@ -422,6 +433,7 @@ export default function AccountPage() {
           bookings={bookings} 
           membershipStatus={membershipStatus}
           onReferFriend={() => setShowReferralModal(true)}
+          onViewAppointments={handleViewAppointments}
         />
 
         {/* Tab Navigation */}
@@ -524,7 +536,7 @@ export default function AccountPage() {
         </div>
 
         {/* Tab Content */}
-        <div className="bg-white rounded-b-2xl shadow-sm border border-t-0 border-tan-100 overflow-hidden">
+        <div id="tab-content" className="bg-white rounded-b-2xl shadow-sm border border-t-0 border-tan-100 overflow-hidden">
           {/* Account Information Tab */}
           {activeTab === 'account' && (
             <>

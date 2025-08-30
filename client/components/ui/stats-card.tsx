@@ -10,6 +10,7 @@ interface StatsCardProps {
     isPositive: boolean
   }
   className?: string
+  onClick?: () => void
 }
 
 export function StatsCard({ 
@@ -18,10 +19,11 @@ export function StatsCard({
   icon, 
   description, 
   trend,
-  className = '' 
+  className = '',
+  onClick
 }: StatsCardProps) {
-  return (
-    <div className={`bg-white rounded-xl shadow-sm border border-tan-100 p-6 hover:shadow-md transition-shadow duration-300 ${className}`}>
+  const cardContent = (
+    <>
       <div className="flex items-start justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-tan-600">{title}</p>
@@ -43,6 +45,23 @@ export function StatsCard({
           </div>
         )}
       </div>
+    </>
+  )
+  
+  if (onClick) {
+    return (
+      <button
+        onClick={onClick}
+        className={`bg-white rounded-xl shadow-sm border border-tan-100 p-6 hover:shadow-md transition-all duration-300 cursor-pointer hover:scale-[1.02] active:scale-[0.98] w-full text-left ${className}`}
+      >
+        {cardContent}
+      </button>
+    )
+  }
+  
+  return (
+    <div className={`bg-white rounded-xl shadow-sm border border-tan-100 p-6 hover:shadow-md transition-shadow duration-300 ${className}`}>
+      {cardContent}
     </div>
   )
 }
