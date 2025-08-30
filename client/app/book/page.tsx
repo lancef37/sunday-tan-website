@@ -1060,24 +1060,25 @@ export default function BookingPage() {
                 {appliedPromoCodes.length === 0 && (
                   <>
                     <p className="text-sm text-tan-600 mb-3">Have a promotional code? Enter it below to apply your discount.</p>
-                    <div className="flex gap-3">
+                    <div className="space-y-3">
                       <input
                         type="text"
                         value={promoCodeInput}
                         onChange={handlePromoCodeChange}
-                        placeholder="Enter code here"
-                        className="flex-1 px-4 py-3 border-2 border-tan-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-400 focus:border-tan-400 transition-all duration-300 bg-white placeholder-tan-400"
+                        placeholder="Enter code"
+                        maxLength={15}
+                        className="w-full sm:w-48 px-4 py-3 border-2 border-tan-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-tan-400 focus:border-tan-400 transition-all duration-300 bg-white placeholder-tan-400 uppercase"
                       />
                       <button
                         type="button"
                         onClick={handleApplyPromoCode}
                         disabled={isValidatingPromo || !promoCodeInput.trim()}
-                        className="px-6 py-3 bg-tan-700 text-white rounded-lg hover:bg-tan-800 disabled:bg-tan-300 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm hover:shadow-md"
+                        className="w-full sm:w-auto px-8 py-3 bg-tan-700 text-white rounded-lg hover:bg-tan-800 disabled:bg-tan-300 disabled:cursor-not-allowed transition-all duration-200 font-medium shadow-sm hover:shadow-md"
                       >
                         {isValidatingPromo ? (
-                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mx-auto"></div>
                         ) : (
-                          'Apply'
+                          'Apply Code'
                         )}
                       </button>
                     </div>
