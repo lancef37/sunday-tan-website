@@ -20,6 +20,22 @@ export default function FAQPage() {
 
   const faqData: FAQItem[] = [
     {
+      question: 'How much does a spray tan cost?',
+      answer: 'Spray tans are $65 for non-members and $52.50 or $40 for members depending on how many tans they book in a single month. A $10 deposit is required for non-members to book an appointment, and the deposit will be charged as part of the $65 fee (remaining $55 due at time of appointment).'
+    },
+    {
+      question: 'How does the membership work?',
+      answer: 'Joining the Sunday Club comes with many perks besides maintaining your glow year-round! For a monthly subscription (cancel anytime) of $105, members have access to two free tans per month with no deposit required at the time of booking. Every additional tan in a given month is only $40. Sunday Club members also get %10 off products like my take-home foam solution!'
+    },
+    {
+      question: 'What happens if I cancel an appointment?',
+      answer: 'Life happens - no problem! If you cancel an appointment more than 48 hours in advance of your appointment, your deposit will be refunded to you, otherwise it is kept. Members have no deposit fee, so no refund to worry about!'
+    },
+    {
+      question: 'What happens if I cancel an included tan as a Sunday Club member, but I have already paid an additional $40 for a third tan in a month?',
+      answer: 'No problem! If you have already paid for a third tan ($40), but you need to cancel an appointment that was booked using one of your two included tans, my system will automatically refund you $40 and move your paid tan to an included tan as part of your membership.'
+    },
+    {
       question: 'Do you do spray tan parties?',
       answer: 'Yes! Text me to schedule a spray tan party. Must be 5+ individuals if you want me to come to you. You also must be an established client for mobile tans.'
     },

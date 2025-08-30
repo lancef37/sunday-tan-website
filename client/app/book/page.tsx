@@ -190,9 +190,17 @@ export default function BookingPage() {
     fetchMembershipStatus()
   }, [step, user])
 
+  // Helper function to format date in local timezone (YYYY-MM-DD)
+  const formatDateForAPI = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const day = String(date.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
+
   const fetchAvailableSlots = async (date: Date) => {
     try {
-      const dateStr = date.toISOString().split('T')[0]
+      const dateStr = formatDateForAPI(date)
       const response = await axios.get(`${API_URL}/api/slots/${dateStr}`)
       setAvailableSlots(response.data)
     } catch (error) {
@@ -245,7 +253,7 @@ export default function BookingPage() {
     if (selectedDate instanceof Date) {
       setBookingData({
         ...bookingData,
-        date: selectedDate.toISOString().split('T')[0],
+        date: formatDateForAPI(selectedDate),
         time: time
       })
       setStep('policy')
@@ -754,19 +762,26 @@ export default function BookingPage() {
                 </div>
 
                 <div className="space-y-4 mb-6">
-                  <div className="flex items-start">
+                <div className="flex items-start">
                     <svg className="w-5 h-5 text-tan-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    <p className="text-gray-700">Appointments will appear in your My Account page</p>
+                    <p className="text-gray-700">Spray tans are $65 unless you are a member of the Sunday Club (sign up in your Account page!)</p>
                   </div>
 
                   <div className="flex items-start">
                     <svg className="w-5 h-5 text-tan-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                     </svg>
-                    <p className="text-gray-700">$10 deposit due at booking (unless you are a member of the Sunday Club or have a promocode)</p>
+                    <p className="text-gray-700">$10 deposit due at booking (unless you are a member of the Sunday Club or have a promocode) and the remaining $55 will be due at the time of your appointment.</p>
                   </div>
+                  
+                  <div className="flex items-start">
+                    <svg className="w-5 h-5 text-tan-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                    <p className="text-gray-700">Appointments will appear in your My Account page</p>
+                  </div>                  
 
                   <div className="flex items-start">
                     <svg className="w-5 h-5 text-tan-600 mt-0.5 mr-3 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
