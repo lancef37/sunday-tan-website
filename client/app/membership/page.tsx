@@ -49,8 +49,8 @@ export default function MembershipPage() {
     try {
       const token = localStorage.getItem('token')
       if (!token) {
+        // Don't redirect to login - allow browsing without authentication
         setCheckingStatus(false)
-        router.push('/login')
         return
       }
 
@@ -67,10 +67,12 @@ export default function MembershipPage() {
           router.push('/account')
         }
       } else if (response.status === 401) {
+        // Token is invalid, but still allow browsing
         localStorage.removeItem('token')
-        router.push('/login')
+        // Don't redirect to login
       }
     } catch (err) {
+      // Error checking status, but still allow browsing
     } finally {
       setCheckingStatus(false)
     }
@@ -190,7 +192,8 @@ export default function MembershipPage() {
     try {
       const token = localStorage.getItem('token')
       if (!token) {
-        router.push('/login')
+        // Redirect to login with return URL to come back here
+        router.push('/login?returnUrl=/membership')
         return
       }
 
